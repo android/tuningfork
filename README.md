@@ -107,7 +107,7 @@ It will contain:
 In the Editor all these files are located under **Google/Android/PerformanceParameters/Editor/AndroidAssets/**
 
 # API
-See the [Tuningfork Unity API References](https://github.com/android/tuningfork/tree/master/Google/Android/PerformanceParameters/Scripts/Tuningfork.cs).
+See the [Tuningfork Unity API References](Google/Android/PerformanceParameters/Scripts/Tuningfork.cs).
 
 # Terms & Conditions
 By downloading the Tuningfork Unity Plugin, you agree to [Terms and Conditions](https://developer.android.com/studio/terms).
