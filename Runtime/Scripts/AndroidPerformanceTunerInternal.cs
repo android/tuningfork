@@ -229,7 +229,7 @@ namespace Google.Android.PerformanceTuner
                     currentLevel = QualitySettings.GetQualityLevel();
                     TFidelity message = new TFidelity();
                     MessageUtil.SetQualityLevel(message, QualitySettings.GetQualityLevel());
-                    SetFidelityParameters(message);
+                    m_AdditionalLibraryMethods.SetFidelityParameters(message);
                 }
             }
         }
