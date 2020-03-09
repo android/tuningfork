@@ -1,0 +1,17 @@
+{
+    "name": "Google.Android.PerformanceTuner.Editor",
+    "references": [
+        "Google.Android.PerformanceTuner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
