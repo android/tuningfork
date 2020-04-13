@@ -34,12 +34,9 @@ namespace Google.Android.PerformanceTuner
         where TFidelity : class, IMessage<TFidelity>, new()
         where TAnnotation : class, IMessage<TAnnotation>, new()
     {
-        // Use only for marshalling static delegates.
-        static AndroidPerformanceTuner<TFidelity, TAnnotation> s_ActiveTf;
         readonly AdditionalLibraryMethods<TFidelity, TAnnotation> m_AdditionalLibraryMethods;
-        readonly FidelityParamsCallback m_FpCallback = FidelityParamsCallbackImpl;
         readonly ILibraryMethods m_Library;
-        readonly UploadCallback m_UploadCallback = UploadCallbackImpl;
+
         Action m_OnStop;
         FrameTracer m_SceneObject;
         SetupConfig m_SetupConfig;
@@ -48,7 +45,6 @@ namespace Google.Android.PerformanceTuner
 
         public AndroidPerformanceTuner()
         {
-            s_ActiveTf = this;
             m_Library =
 #if UNITY_ANDROID && !UNITY_EDITOR
                 new AndroidLibraryMethods();
@@ -56,6 +52,8 @@ namespace Google.Android.PerformanceTuner
                 new DefaultLibraryMethods();
 #endif
             m_AdditionalLibraryMethods = new AdditionalLibraryMethods<TFidelity, TAnnotation>(m_Library);
+            Callbacks.fidelityParamsReceived = FidelityParamsCallbackImpl;
+            Callbacks.uploadReceived = UploadCallbackImpl;
         }
 
         ErrorCode StartInternal()
@@ -76,11 +74,11 @@ namespace Google.Android.PerformanceTuner
                 return ErrorCode.TuningforkNotInitialized;
             }
 
-            var validAnnotation = CheckAnnotationMessage(m_SetupConfig);
-            var validFidelity = CheckFidelityMessage(m_SetupConfig);
+            var annotationStatus = CheckAnnotationMessage(m_SetupConfig);
+            var fidelityStatus = CheckFidelityMessage(m_SetupConfig);
 
-            if (validAnnotation != ErrorCode.Ok || validFidelity != ErrorCode.Ok)
-                return ErrorCode.BadParameter;
+            if (annotationStatus != ErrorCode.Ok) return annotationStatus;
+            if (fidelityStatus != ErrorCode.Ok) return fidelityStatus;
 
 
             IMessage defaultQualityParameters = null;
@@ -90,7 +88,8 @@ namespace Google.Android.PerformanceTuner
                 MessageUtil.SetQualityLevel(defaultQualityParameters, QualitySettings.GetQualityLevel());
             }
 
-            var errorCode = m_AdditionalLibraryMethods.Init(m_FpCallback, defaultQualityParameters, m_endPoint);
+            var errorCode = m_AdditionalLibraryMethods.Init(Callbacks.FidelityParamsCallbackImpl,
+                defaultQualityParameters, m_endPoint);
 
             if (errorCode != ErrorCode.Ok)
             {
@@ -119,14 +118,14 @@ namespace Google.Android.PerformanceTuner
             {
                 Debug.LogError("Android Performance Tuner is using default annotation, " +
                                "but Annotation message doesn't contain loading state parameter.");
-                return ErrorCode.BadParameter;
+                return ErrorCode.InvalidAnnotation;
             }
 
             if (!MessageUtil.HasScene<TAnnotation>())
             {
                 Debug.LogError("Android Performance Tuner is using default annotation, " +
                                "but Annotation message doesn't contain scene parameter.");
-                return ErrorCode.BadParameter;
+                return ErrorCode.InvalidAnnotation;
             }
 
             return ErrorCode.Ok;
@@ -140,7 +139,7 @@ namespace Google.Android.PerformanceTuner
             {
                 Debug.LogError("Android Performance Tuner is using default fidelity, " +
                                "but Fidelity message doesn't contain level parameter.");
-                return ErrorCode.BadParameter;
+                return ErrorCode.InvalidFidelity;
             }
 
             return ErrorCode.Ok;
@@ -155,7 +154,7 @@ namespace Google.Android.PerformanceTuner
 
         void AddUploadCallback()
         {
-            var errorCode = m_Library.SetUploadCallback(m_UploadCallback);
+            var errorCode = m_Library.SetUploadCallback(Callbacks.UploadCallbackImpl);
             if (errorCode != ErrorCode.Ok)
                 Debug.LogWarningFormat("Android Performance Tuner: Could not set upload callback, status {0}",
                     errorCode);
@@ -198,13 +197,25 @@ namespace Google.Android.PerformanceTuner
             QualitySettings.SetQualityLevel(qualityLevel);
         }
 
+        MessageUtil.LoadingState m_DefaultAnnotationLoadingState = MessageUtil.LoadingState.NotLoading;
+
         void OnSceneChanged(UnityEngine.SceneManagement.Scene from, UnityEngine.SceneManagement.Scene to)
         {
             var annotation = new TAnnotation();
             MessageUtil.SetScene(annotation, to.buildIndex);
-            MessageUtil.SetLoadingState(annotation, MessageUtil.LoadingState.NotLoading);
-            SetCurrentAnnotation(annotation);
+            MessageUtil.SetLoadingState(annotation, m_DefaultAnnotationLoadingState);
+            m_AdditionalLibraryMethods.SetCurrentAnnotation(annotation);
         }
+
+        ErrorCode SetDefaultAnnotation(MessageUtil.LoadingState state)
+        {
+            var annotation = new TAnnotation();
+            MessageUtil.SetScene(annotation, SceneManager.GetActiveScene().buildIndex);
+            MessageUtil.SetLoadingState(annotation, state);
+            m_DefaultAnnotationLoadingState = state;
+            return m_AdditionalLibraryMethods.SetCurrentAnnotation(annotation);
+        }
+
 
         /// <summary>
         ///     Used if swappy is not available.
@@ -262,21 +273,38 @@ namespace Google.Android.PerformanceTuner
             }
         }
 
-        // These callbacks must be static as il2cpp can not marshall non-static delegates.
-        [MonoPInvokeCallback(typeof(UploadCallback))]
-        static void UploadCallbackImpl(IntPtr bytes, uint size)
+
+        void UploadCallbackImpl(IntPtr bytes, uint size)
         {
-            if (s_ActiveTf == null || s_ActiveTf.onReceiveUploadLog == null) return;
-            // Don't call OnReceiveUploadLog directly from this thread.
-            s_ActiveTf.m_UploadTelemetryRequest = UploadTelemetryRequest.Parse(bytes, size);
+            if (onReceiveUploadLog == null) return;
+            m_UploadTelemetryRequest = UploadTelemetryRequest.Parse(bytes, size);
         }
 
-        [MonoPInvokeCallback(typeof(FidelityParamsCallback))]
-        static void FidelityParamsCallbackImpl(ref CProtobufSerialization ps)
+        void FidelityParamsCallbackImpl(CProtobufSerialization ps)
         {
-            if (s_ActiveTf == null && s_ActiveTf.onReceiveUploadLog == null) return;
+            if (onReceiveFidelityParameters == null) return;
             // Don't call OnReceiveFidelityParameters directly from this thread.
-            s_ActiveTf.m_ReceivedFidelityParameters = ps.ParseMessage<TFidelity>();
+            m_ReceivedFidelityParameters = ps.ParseMessage<TFidelity>();
+        }
+    }
+
+    static class Callbacks
+    {
+        internal static Action<CProtobufSerialization> fidelityParamsReceived;
+        internal static Action<IntPtr, uint> uploadReceived;
+
+        // These callbacks must be static as il2cpp can not marshall non-static delegates.
+        [MonoPInvokeCallback(typeof(FidelityParamsCallback))]
+        internal static void FidelityParamsCallbackImpl(ref CProtobufSerialization ps)
+        {
+            if (fidelityParamsReceived != null) fidelityParamsReceived(ps);
+        }
+
+        // These callbacks must be static as il2cpp can not marshall non-static delegates.
+        [MonoPInvokeCallback(typeof(UploadCallback))]
+        internal static void UploadCallbackImpl(IntPtr bytes, uint size)
+        {
+            if (uploadReceived != null) uploadReceived(bytes, size);
         }
     }
 }

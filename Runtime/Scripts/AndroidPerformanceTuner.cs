@@ -39,7 +39,7 @@ namespace Google.Android.PerformanceTuner
         public Action<UploadTelemetryRequest> onReceiveUploadLog;
 
         /// <summary>
-        ///     Start Android Performance Tuner.
+        ///     Start <see cref="AndroidPerformanceTuner"/>.
         /// </summary>
         /// <returns> Code returned by Android Performance Tuner library. </returns>
         public ErrorCode Start()
@@ -52,6 +52,9 @@ namespace Google.Android.PerformanceTuner
         ///     Available for debug builds only.
         ///     Check README or integration guide for more details how to enable local end point.
         /// </summary>
+        /// <returns>
+        ///     <see cref="ErrorCode.InvalidMode"/> if using in non-debug build.
+        /// </returns>
         public ErrorCode EnableLocalEndpoint()
         {
             if (Debug.isDebugBuild)
@@ -68,7 +71,7 @@ namespace Google.Android.PerformanceTuner
             Debug.Log("You tried to enable the local endpoint, " +
                       "but your build is not a debug build. " +
                       "The local endpoint will NOT be used.");
-            return ErrorCode.BadParameter;
+            return ErrorCode.InvalidMode;
         }
 
         /// <summary>
@@ -95,8 +98,8 @@ namespace Google.Android.PerformanceTuner
         /// <param name="defaultFidelity">these will be assumed current if no parameters could be downloaded</param>
         /// <param name="initialTimeoutMs">time to wait before returning from this call when no connection can be made</param>
         /// <returns>
-        ///     TFERROR_TIMEOUT if there was a timeout before params could be downloaded.
-        ///     TFERROR_OK if there was a timeout before params could be downloaded.
+        ///     <see cref="ErrorCode.Timeout"/> if there was a timeout before params could be downloaded.
+        ///     <see cref="ErrorCode.Ok"/> on success.
         /// </returns>
         public Result<TFidelity> GetFidelityParameters(TFidelity defaultFidelity, uint initialTimeoutMs)
         {
@@ -105,18 +108,53 @@ namespace Google.Android.PerformanceTuner
 
         /// <summary>
         ///     Set the current annotation.
+        ///     Use only for custom annotation.
         /// </summary>
         /// <param name="annotation">current annotation.</param>
         /// <returns>
-        ///     TFERROR_INVALID_ANNOTATION if annotation is inconsistent with the settings or has invalid value set.
-        ///     TFERROR_OK on success.
+        ///     <see cref="ErrorCode.TuningforkNotInitialized"/> if plugin is not initialized.
+        ///     <see cref="ErrorCode.InvalidMode"/> if using with default annotation mode.
+        ///     <see cref="ErrorCode.InvalidAnnotation"/> if annotation is inconsistent with the settings or has invalid value set.
+        ///     <see cref="ErrorCode.Ok"/> on success.
         /// </returns>
         public ErrorCode SetCurrentAnnotation(TAnnotation annotation)
         {
-            if (MessageUtil.HasInvalidEnumField(annotation))
-                return ErrorCode.InvalidAnnotation;
+            if (m_SetupConfig == null) return ErrorCode.TuningforkNotInitialized;
 
-            return m_AdditionalLibraryMethods.SetCurrentAnnotation(annotation);
+            if (m_SetupConfig.useAdvancedAnnotations)
+                return m_AdditionalLibraryMethods.SetCurrentAnnotation(annotation);
+
+            Debug.LogWarning("Android Performance Tuner: " +
+                             "Don't set annotation when default annotation enabled");
+            return ErrorCode.InvalidMode;
+        }
+
+        /// <summary>
+        ///     Set loading state.
+        ///     Use only for default annotation.
+        ///     Set <see cref="MessageUtil.LoadingState.Loading"/> when loading is started.
+        ///     <br/><b>Important:</b>
+        ///     <list type="bullet">
+        ///         <item> Don't forget to set <see cref="MessageUtil.LoadingState.NotLoading"/> when loading is finished. </item>
+        ///         <item> Frame information will not be recorded during loading. </item>
+        ///     </list>
+        /// </summary>
+        /// <param name="state">loading state</param>
+        /// <returns>
+        ///     <see cref="ErrorCode.TuningforkNotInitialized"/> if plugin is not initialized.
+        ///     <see cref="ErrorCode.InvalidMode"/> if using with custom annotation mode.
+        ///     <see cref="ErrorCode.Ok"/> on success.
+        /// </returns>
+        public ErrorCode SetLoadingState(MessageUtil.LoadingState state)
+        {
+            if (m_SetupConfig == null) return ErrorCode.TuningforkNotInitialized;
+
+            if (!m_SetupConfig.useAdvancedAnnotations)
+                return SetDefaultAnnotation(state);
+
+            Debug.LogWarning("Android Performance Tuner: " +
+                             "Don't set loading state when custom annotation enabled");
+            return ErrorCode.InvalidMode;
         }
 
         /// <summary>
@@ -125,8 +163,8 @@ namespace Google.Android.PerformanceTuner
         /// </summary>
         /// <param name="key">An instrument key.</param>
         /// <returns>
-        ///     TFERROR_INVALID_INSTRUMENT_KEY if the instrument key is invalid.
-        ///     TFERROR_OK on success.
+        ///    <see cref="ErrorCode.InvalidInstrumentKey"/> if the instrument key is invalid.
+        ///    <see cref="ErrorCode.Ok"/> on success.
         /// </returns>
         public ErrorCode FrameTick(InstrumentationKeys key)
         {
@@ -135,11 +173,10 @@ namespace Google.Android.PerformanceTuner
 
         /// <summary>
         ///     Force upload of the current histograms.
-        ///     * Return TFERROR_OK if the upload could be initiated.
-        ///     * Return TFERROR_PREVIOUS_UPLOAD_PENDING if there is a previous upload blocking this one.
-        ///     * Return TFERROR_UPLOAD_TOO_FREQUENT if less than a minute has elapsed since the previous upload.
         /// </summary>
-        /// <returns>Status of flush operation.</returns>
+        /// <returns> <see cref="ErrorCode.Ok"/> if the upload could be initiated. </returns>
+        /// <returns> <see cref="ErrorCode.PreviousUploadPending"/> if there is a previous upload blocking this one. </returns>
+        /// <returns> <see cref="ErrorCode.UploadTooFrequent"/> if less than a minute has elapsed since the previous upload. </returns>
         public ErrorCode Flush()
         {
             return m_Library.Flush();
@@ -174,7 +211,12 @@ namespace Google.Android.PerformanceTuner
         ///     This flushes (i.e. uploads) any data associated with any previous parameters.
         /// </summary>
         /// <param name="fidelityParams">The new fidelity parameters</param>
-        /// <returns>TFERROR_OK if the parameters could be set.</returns>
+        /// <returns>
+        ///     <see cref="ErrorCode.Ok"/> if the parameters could be set.
+        ///     <see cref="ErrorCode.InvalidFidelity"/> if the message has invalid values.
+        ///     <see cref="ErrorCode.TuningforkNotInitialized"/> if plugin is not initialized.
+        ///     <see cref="ErrorCode.InvalidMode"/> if using with default fidelity mode.
+        /// </returns>
         public ErrorCode SetFidelityParameters(TFidelity fidelityParams)
         {
             if (m_SetupConfig == null) return ErrorCode.TuningforkNotInitialized;
@@ -184,7 +226,7 @@ namespace Google.Android.PerformanceTuner
 
             Debug.LogWarning("Android Performance Tuner: " +
                              "Don't set fidelity parameters when default fidelity parameters enabled");
-            return ErrorCode.BadParameter;
+            return ErrorCode.InvalidMode;
         }
     }
 }

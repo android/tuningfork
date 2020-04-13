@@ -41,7 +41,7 @@ namespace Google.Android.PerformanceTuner.Editor
 
         const string k_HelpInfo =
             "All quality levels are saved into " +
-            "Google/Android/PerformanceParameters/Editor/AndroidAssets/dev_tuningfork_fidelityparams_*.bin files.\n" +
+            "AndroidPerformanceTuner_gen/Editor/AndroidAssets/dev_tuningfork_fidelityparams_*.bin files.\n" +
             "You should have at least one quality level.";
 
         readonly TrendHelper m_Helper = new TrendHelper();

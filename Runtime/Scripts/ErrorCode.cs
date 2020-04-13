@@ -170,5 +170,15 @@ namespace Google.Android.PerformanceTuner
         ///     The game or app is run on a platform not supporting Tuning fork.
         /// </summary>
         PlatformNotSupported = 28,
+
+        /// <summary>
+        ///     Fidelity message is invalid.
+        /// </summary>
+        InvalidFidelity = 29,
+
+        /// <summary>
+        ///     Using incorrect API for default/custom modes.
+        /// </summary>
+        InvalidMode = 30,
     }
 }

@@ -30,13 +30,9 @@ namespace Google.Android.PerformanceTuner.Editor
 
         const string k_InfoText =
             "Settings are auto-saved into " +
-            "AndroidPerformanceTuner/Editor/AndroidAssets/tuningfork_settings.bin.\n" +
+            "AndroidPerformanceTuner_gen/Editor/AndroidAssets/tuningfork_settings.bin.\n" +
             "To get better frame rate in your game turn on frame pacing optimization in" +
             " Player->Resolution and Presentation->Optimized Frame Pacing.";
-
-
-        GUIContent m_PluginEnabled;
-        GUIContent m_PluginDisabled;
 
         public SettingsEditor(ProjectData projectData, SetupConfig setupConfig)
         {
@@ -54,24 +50,63 @@ namespace Google.Android.PerformanceTuner.Editor
             m_ProjectData.apiKey = EditorGUILayout.TextField("API key", m_ProjectData.apiKey);
         }
 
+        StatusContent m_PluginStatus;
+        StatusContent m_ApiStatus;
+        StatusContent m_FidelityModeStatus;
+        StatusContent m_AnnotationModeStatus;
+
         void LoadStyles()
         {
-            if (m_PluginEnabled == null)
-                m_PluginEnabled = new GUIContent("Android Performance Tuner is enabled", (Texture) Resources.Load("ic_done"));
-            if (m_PluginDisabled == null)
-                m_PluginDisabled =
-                    new GUIContent("Android Performance Tuner is disabled", (Texture) Resources.Load("ic_error_outline"));
+            Texture textureDone = (Texture) Resources.Load("ic_done");
+            Texture textureError = (Texture) Resources.Load("ic_error_outline");
+
+            m_PluginStatus = new StatusContent(
+                new GUIContent("Android Performance Tuner is enabled", textureDone),
+                new GUIContent("Android Performance Tuner is disabled", textureError));
+
+            m_ApiStatus = new StatusContent(
+                new GUIContent("API key is not set", textureError),
+                new GUIContent("API key is set", textureDone));
+
+            m_FidelityModeStatus = new StatusContent(
+                new GUIContent("Using custom fidelity", textureDone),
+                new GUIContent("Using default fidelity", textureDone));
+
+            m_AnnotationModeStatus = new StatusContent(
+                new GUIContent("Using custom annotation", textureDone),
+                new GUIContent("Using default annotation", textureDone));
         }
 
         void RenderPluginStatus()
         {
-            var label = m_SetupConfig.pluginEnabled ? m_PluginEnabled : m_PluginDisabled;
-
             GUILayout.Space(10);
             using (var group = new EditorGUI.ChangeCheckScope())
             {
-                m_SetupConfig.pluginEnabled = EditorGUILayout.ToggleLeft(label, m_SetupConfig.pluginEnabled);
+                m_SetupConfig.pluginEnabled = EditorGUILayout.ToggleLeft(m_PluginStatus[m_SetupConfig.pluginEnabled],
+                    m_SetupConfig.pluginEnabled);
                 if (group.changed) EditorUtility.SetDirty(m_SetupConfig);
+            }
+
+            GUILayout.Space(10);
+            EditorGUILayout.LabelField(m_ApiStatus[string.IsNullOrEmpty(m_ProjectData.apiKey)]);
+            EditorGUILayout.LabelField(m_FidelityModeStatus[m_SetupConfig.useAdvancedFidelityParameters]);
+            EditorGUILayout.LabelField(m_AnnotationModeStatus[m_SetupConfig.useAdvancedAnnotations]);
+        }
+
+        class StatusContent
+        {
+            readonly GUIContent m_ContentOn;
+            readonly GUIContent m_ContentOff;
+
+            public StatusContent(GUIContent contentOn, GUIContent contentOff)
+            {
+                m_ContentOn = contentOn;
+                m_ContentOff = contentOff;
+            }
+
+            public GUIContent this[bool on]
+            {
+                get { return on ? m_ContentOn : m_ContentOff; }
             }
         }
     }

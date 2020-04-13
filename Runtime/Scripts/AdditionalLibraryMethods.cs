@@ -75,7 +75,7 @@ namespace Google.Android.PerformanceTuner
             if (errorCode == ErrorCode.Ok)
             {
                 fp = ps.ParseMessage<TFidelity>();
-                if (fp == null) errorCode = ErrorCode.BadParameter;
+                if (fp == null) errorCode = ErrorCode.InvalidFidelity;
             }
 
             CProtobufSerialization.CallDealloc(ref ps);
@@ -92,7 +92,7 @@ namespace Google.Android.PerformanceTuner
             if (errorCode == ErrorCode.Ok)
             {
                 fp = newPs.ParseMessage<TFidelity>();
-                if (fp == null) errorCode = ErrorCode.BadParameter;
+                if (fp == null) errorCode = ErrorCode.InvalidFidelity;
             }
 
             CProtobufSerialization.CallDealloc(ref newPs);
@@ -102,6 +102,7 @@ namespace Google.Android.PerformanceTuner
 
         public ErrorCode SetCurrentAnnotation(TAnnotation annotation)
         {
+            if (MessageUtil.HasInvalidEnumField(annotation)) return ErrorCode.InvalidAnnotation;
             var ps = CProtobufSerialization.Create(annotation);
             var errorCode = m_LibraryMethods.SetCurrentAnnotation(ref ps);
             CProtobufSerialization.CallDealloc(ref ps);
@@ -110,6 +111,7 @@ namespace Google.Android.PerformanceTuner
 
         public ErrorCode SetFidelityParameters(TFidelity fidelityParams)
         {
+            if (MessageUtil.HasInvalidEnumField(fidelityParams)) return ErrorCode.InvalidFidelity;
             var ps = CProtobufSerialization.Create(fidelityParams);
             var errorCode = m_LibraryMethods.SetFidelityParameters(ref ps);
             CProtobufSerialization.CallDealloc(ref ps);
