@@ -52,8 +52,8 @@ namespace Google.Android.PerformanceTuner
                 new DefaultLibraryMethods();
 #endif
             m_AdditionalLibraryMethods = new AdditionalLibraryMethods<TFidelity, TAnnotation>(m_Library);
-            Callbacks.fidelityParamsReceived = FidelityParamsCallbackImpl;
-            Callbacks.uploadReceived = UploadCallbackImpl;
+            Callbacks.onFidelityParamsReceived = FidelityParamsCallbackImpl;
+            Callbacks.onUploadReceived = UploadCallbackImpl;
         }
 
         ErrorCode StartInternal()
@@ -107,6 +107,7 @@ namespace Google.Android.PerformanceTuner
             if (!m_SetupConfig.useAdvancedFidelityParameters) EnableDefaultFidelityMode();
 
             AddUploadCallback();
+            AddAutoFlush();
 
             return errorCode;
         }
@@ -158,6 +159,15 @@ namespace Google.Android.PerformanceTuner
             if (errorCode != ErrorCode.Ok)
                 Debug.LogWarningFormat("Android Performance Tuner: Could not set upload callback, status {0}",
                     errorCode);
+        }
+
+        void AddAutoFlush()
+        {
+            m_SceneObject.onAppInBackground += () =>
+            {
+                ErrorCode code = m_Library.Flush();
+                Debug.LogFormat("Flush in background {0}", code);
+            };
         }
 
         void EnableDefaultFidelityMode()
@@ -225,7 +235,7 @@ namespace Google.Android.PerformanceTuner
             while (true)
             {
                 yield return new WaitForEndOfFrame();
-                FrameTick(InstrumentationKeys.UnityFrame);
+                FrameTick(InstrumentationKeys.RawFrameTime);
             }
         }
 
@@ -290,21 +300,21 @@ namespace Google.Android.PerformanceTuner
 
     static class Callbacks
     {
-        internal static Action<CProtobufSerialization> fidelityParamsReceived;
-        internal static Action<IntPtr, uint> uploadReceived;
+        internal static Action<CProtobufSerialization> onFidelityParamsReceived;
+        internal static Action<IntPtr, uint> onUploadReceived;
 
         // These callbacks must be static as il2cpp can not marshall non-static delegates.
         [MonoPInvokeCallback(typeof(FidelityParamsCallback))]
         internal static void FidelityParamsCallbackImpl(ref CProtobufSerialization ps)
         {
-            if (fidelityParamsReceived != null) fidelityParamsReceived(ps);
+            if (onFidelityParamsReceived != null) onFidelityParamsReceived(ps);
         }
 
         // These callbacks must be static as il2cpp can not marshall non-static delegates.
         [MonoPInvokeCallback(typeof(UploadCallback))]
         internal static void UploadCallbackImpl(IntPtr bytes, uint size)
         {
-            if (uploadReceived != null) uploadReceived(bytes, size);
+            if (onUploadReceived != null) onUploadReceived(bytes, size);
         }
     }
 }

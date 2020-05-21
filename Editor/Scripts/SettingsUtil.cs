@@ -30,28 +30,28 @@ namespace Google.Android.PerformanceTuner.Editor
             {
                 new Settings.Types.Histogram()
                 {
-                    InstrumentKey = (int) InstrumentationKeys.SysCPU,
+                    InstrumentKey = (int) InstrumentationKeys.RawFrameTime,
                     BucketMin = 6.54f,
                     BucketMax = 60f,
                     NBuckets = 200,
                 },
                 new Settings.Types.Histogram()
                 {
-                    InstrumentKey = (int) InstrumentationKeys.SysGPU,
+                    InstrumentKey = (int) InstrumentationKeys.PacedFrameTime,
                     BucketMin = 10,
                     BucketMax = 40,
                     NBuckets = 30,
                 },
                 new Settings.Types.Histogram()
                 {
-                    InstrumentKey = (int) InstrumentationKeys.SwappySwapTime,
+                    InstrumentKey = (int) InstrumentationKeys.GpuTime,
                     BucketMin = 0,
                     BucketMax = 20,
                     NBuckets = 30,
                 },
                 new Settings.Types.Histogram()
                 {
-                    InstrumentKey = (int) InstrumentationKeys.SwappyWaitTime,
+                    InstrumentKey = (int) InstrumentationKeys.CpuTime,
                     BucketMin = 0,
                     BucketMax = 20,
                     NBuckets = 30,
@@ -61,7 +61,7 @@ namespace Google.Android.PerformanceTuner.Editor
         static readonly Settings.Types.AggregationStrategy k_DefaultAggregation =
             new Settings.Types.AggregationStrategy()
             {
-                IntervalmsOrCount = 7200000,
+                IntervalmsOrCount = 600000, /* 10 minutes */
                 Method = Settings.Types.AggregationStrategy.Types.Submission.TimeBased
             };
 

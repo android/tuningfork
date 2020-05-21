@@ -83,6 +83,18 @@ namespace Google.Android.PerformanceTuner.Editor
             Application.streamingAssetsPath, "tuningfork");
 
         /// <summary>
+        ///     Relative path to assets folder.
+        ///     For unity >= 2018.2 it points to AndroidAssets.
+        ///     For unity < 2018.2 it points to StreamingAssets.
+        /// </summary>
+        public static readonly string androidAssetsPathName =
+#if UNITY_2018_2_OR_NEWER
+            Path.Combine("AndroidPerformanceTuner_gen", "Editor", "AndroidAssets");
+#else
+            Path.Combine("StreamingAssets", "tuningfork");
+#endif
+
+        /// <summary>
         ///     Path to assets folder.
         ///     For unity >= 2018.2 it points to AndroidAssets.
         ///     For unity < 2018.2 it points to StreamingAssets.

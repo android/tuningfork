@@ -78,6 +78,11 @@ namespace Google.Android.PerformanceTuner.Editor
             }
         }
 
+        public bool hasLoadingState
+        {
+            get { return m_Settings.LoadingAnnotationIndex > 0; }
+        }
+
         /// <summary>
         ///     Check if settings has outdated annotation enum sizes.
         /// </summary>

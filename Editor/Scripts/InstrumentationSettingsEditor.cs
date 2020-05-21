@@ -19,6 +19,8 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Linq.Expressions;
+using System.Text;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -31,6 +33,7 @@ namespace Google.Android.PerformanceTuner.Editor
         readonly EditorStatePrefs<EditorState> m_EditorStatePrefs;
         readonly ProjectData m_ProjectData;
         readonly EditorState m_EditorState;
+        readonly String m_DefaultSettingsUiString;
 
         const string k_DefaultInfo =
             "       Use advanced settings only if you've found the default ones are not working for you.";
@@ -48,8 +51,10 @@ namespace Google.Android.PerformanceTuner.Editor
                 });
             m_ProjectData = projectData;
             m_EditorState = m_EditorStatePrefs.Get();
+            m_DefaultSettingsUiString = ToUiString(SettingsUtil.defaultSettings);
             LoadFromCachedEditorStateOrData();
         }
+
 
         public void OnGUI()
         {
@@ -59,7 +64,8 @@ namespace Google.Android.PerformanceTuner.Editor
                 m_EditorState.useAdvanced = !GUILayout.Toggle(
                     !m_EditorState.useAdvanced, "  Use default settings (recommended)", EditorStyles.radioButton);
 
-                EditorGUILayout.LabelField(k_DefaultInfo, EditorStyles.wordWrappedLabel, GUILayout.ExpandWidth(true));
+                ShowDefaultSettings();
+
                 GUILayout.Space(10);
 
                 m_EditorState.useAdvanced = GUILayout.Toggle(
@@ -72,6 +78,11 @@ namespace Google.Android.PerformanceTuner.Editor
                         LoadFromCachedEditorStateOrData();
                         m_AdvancedSettings = m_ProjectData.SetSettings(m_AdvancedSettings);
                     }
+                    else
+                    {
+                        m_ProjectData.ResetSettingsToDefault();
+                    }
+
 
                     CacheSettings();
                 }
@@ -105,6 +116,26 @@ namespace Google.Android.PerformanceTuner.Editor
             GUILayout.Space(10);
         }
 
+
+        bool m_DefaultSettingsFoldGroup = false;
+
+        void ShowDefaultSettings()
+        {
+            EditorGUILayout.LabelField(k_DefaultInfo, EditorStyles.wordWrappedLabel, GUILayout.ExpandWidth(true));
+
+            EditorGUI.indentLevel++;
+            m_DefaultSettingsFoldGroup = EditorGUILayout.Foldout(m_DefaultSettingsFoldGroup, "Default settings");
+            if (m_DefaultSettingsFoldGroup)
+            {
+                EditorGUILayout.LabelField("<i>These are default instrumentation settings</i>",
+                    Styles.richWordWrappedLabel,
+                    GUILayout.ExpandWidth(true));
+                EditorGUILayout.LabelField(m_DefaultSettingsUiString, Styles.richWordWrappedLabel,
+                    GUILayout.ExpandWidth(true));
+            }
+
+            EditorGUI.indentLevel--;
+        }
 
         void LoadFromCachedEditorStateOrData()
         {
@@ -144,9 +175,13 @@ namespace Google.Android.PerformanceTuner.Editor
                         EditorGUILayout.IntField("Count", m_AdvancedSettings.AggregationStrategy.IntervalmsOrCount);
                     break;
                 case Settings.Types.AggregationStrategy.Types.Submission.TimeBased:
-                    m_AdvancedSettings.AggregationStrategy.IntervalmsOrCount =
-                        EditorGUILayout.IntField("Intervals (ms)",
-                            m_AdvancedSettings.AggregationStrategy.IntervalmsOrCount);
+                    float minutes = EditorGUILayout.Slider("Intervals (minutes)",
+                        m_AdvancedSettings.AggregationStrategy.IntervalmsOrCount / 60000f /* from ms to minutes */,
+                        0.5f /* 30 seconds */,
+                        120f /* 2 hours */);
+                    float milliseconds = 60000f /* from minutes to ms */ *
+                                         Mathf.RoundToInt(minutes * 2f) / 2f /* round to have half-minute steps */;
+                    m_AdvancedSettings.AggregationStrategy.IntervalmsOrCount = (int) milliseconds;
                     break;
                 case Settings.Types.AggregationStrategy.Types.Submission.Undefined:
                     EditorGUILayout.HelpBox("Choose Time based or Tick based ", MessageType.Error);
@@ -201,6 +236,34 @@ namespace Google.Android.PerformanceTuner.Editor
                     return keyEnum.ToString();
 
             return string.Empty;
+        }
+
+        /// <summary>
+        /// Convert settings to a readable string to display in UI.
+        /// </summary>
+        static string ToUiString(Settings settings)
+        {
+            int minutes = settings.AggregationStrategy.IntervalmsOrCount /* ms */ / (60 * 1000);
+            StringBuilder builder = new StringBuilder()
+                .AppendFormat("       Aggregation Strategy\n")
+                .AppendFormat("       Submission method: <b>{0}</b>\n",
+                    settings.AggregationStrategy.Method)
+                .AppendFormat("       Intervals: <b>{0} minutes</b>\n\n", minutes)
+                .Append("       Histograms\n");
+
+            builder.Append("       Instrument Key\tBucket min(ms)\tBucket max(ms)\tNumber of buckets\n");
+            foreach (var histogram in settings.Histograms)
+            {
+                builder.AppendFormat("       {0}\t{1}{2}\t\t{3}\t\t{4}\n",
+                    FindInstrumentationKeyName(histogram.InstrumentKey),
+                    // Extra tab for 64002/64003 keys to align table.
+                    histogram.InstrumentKey == 64002 || histogram.InstrumentKey == 64003 ? "\t" : "",
+                    histogram.BucketMin,
+                    histogram.BucketMax,
+                    histogram.NBuckets);
+            }
+
+            return builder.ToString();
         }
 
         [Serializable]

@@ -69,6 +69,19 @@ namespace Google.Android.PerformanceTuner.Editor.Proto
             return enums;
         }
 
+        public EnumInfo? GetInfo(string name)
+        {
+            EnumDescriptor enumType = m_EnumTypes.FirstOrDefault(x => x.Name == name);
+            if (enumType == null) return null;
+            var prefix = enumType.Name + "_";
+            var prefixSize = prefix.Length;
+            return new EnumInfo
+            {
+                name = enumType.Name,
+                values = enumType.Values.Select(enumValue => enumValue.Name.Substring(prefixSize)).ToList()
+            };
+        }
+
 
         static readonly Regex k_SceneFieldRegex = new Regex("[^a-zA-Z0-9_]");
 

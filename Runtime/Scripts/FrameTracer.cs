@@ -18,11 +18,18 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System;
+using UnityEngine;
+
 namespace Google.Android.PerformanceTuner
 {
-    using UnityEngine;
-
     public class FrameTracer : MonoBehaviour
     {
+        public Action onAppInBackground;
+
+        void OnApplicationPause(bool pauseStatus)
+        {
+            if (onAppInBackground != null && pauseStatus) onAppInBackground();
+        }
     }
 }

@@ -28,11 +28,15 @@ namespace Google.Android.PerformanceTuner.Editor
         readonly ProjectData m_ProjectData;
         readonly SetupConfig m_SetupConfig;
 
-        const string k_InfoText =
-            "Settings are auto-saved into " +
-            "AndroidPerformanceTuner_gen/Editor/AndroidAssets/tuningfork_settings.bin.\n" +
+        static readonly string k_InfoText =
+            "Settings are auto-saved into " + Paths.androidAssetsPathName + "/tuningfork_settings.bin.\n" +
             "To get better frame rate in your game turn on frame pacing optimization in" +
             " Player->Resolution and Presentation->Optimized Frame Pacing.";
+
+        static readonly string k_LoadingWarning =
+            "Loading annotations mark frames that are part of the level loading process. " +
+            "It is highly recommended that you use loading annotations so that slower frames " +
+            "while the game is loading do not affect your overall metrics.";
 
         public SettingsEditor(ProjectData projectData, SetupConfig setupConfig)
         {
@@ -54,6 +58,7 @@ namespace Google.Android.PerformanceTuner.Editor
         StatusContent m_ApiStatus;
         StatusContent m_FidelityModeStatus;
         StatusContent m_AnnotationModeStatus;
+        StatusContent m_LoadingAnnotationStatus;
 
         void LoadStyles()
         {
@@ -75,6 +80,10 @@ namespace Google.Android.PerformanceTuner.Editor
             m_AnnotationModeStatus = new StatusContent(
                 new GUIContent("Using custom annotation", textureDone),
                 new GUIContent("Using default annotation", textureDone));
+
+            m_LoadingAnnotationStatus = new StatusContent(
+                new GUIContent("A loading state annotation is present", textureDone),
+                new GUIContent("A loading state annotation is missing.", textureError));
         }
 
         void RenderPluginStatus()
@@ -91,6 +100,11 @@ namespace Google.Android.PerformanceTuner.Editor
             EditorGUILayout.LabelField(m_ApiStatus[string.IsNullOrEmpty(m_ProjectData.apiKey)]);
             EditorGUILayout.LabelField(m_FidelityModeStatus[m_SetupConfig.useAdvancedFidelityParameters]);
             EditorGUILayout.LabelField(m_AnnotationModeStatus[m_SetupConfig.useAdvancedAnnotations]);
+            EditorGUILayout.LabelField(m_LoadingAnnotationStatus[m_ProjectData.hasLoadingState]);
+            if (!m_ProjectData.hasLoadingState)
+            {
+                EditorGUILayout.HelpBox(k_LoadingWarning, MessageType.Warning);
+            }
         }
 
         class StatusContent

@@ -259,19 +259,19 @@ namespace Google.Android.PerformanceTuner.Editor
         {
             var originalEnumNames = m_EnumInfoHelper.GetAllNames();
             selected = Mathf.Clamp(selected, 0, originalEnumNames.Count() - 1);
-            originalEnumNames.Add("► Add or update enum...");
-            originalEnumNames.Add("► Delete enum...");
+            originalEnumNames.Add("► Add enum...");
+            originalEnumNames.Add("► Update or delete enum...");
             string[] enumNames = originalEnumNames.ToArray();
             int addIndex = enumNames.Count() - 2;
-            int deleteIndex = enumNames.Count() - 1;
+            int deleteOrUpdateIndex = enumNames.Count() - 1;
             int newSelected = EditorGUI.Popup(rect, selected, enumNames);
             if (newSelected == addIndex)
             {
-                NewEnumWindow.ShowWindow(m_ProtoFile, m_EnumInfoHelper);
+                NewEnumWindow.ShowNewEnumWindow(m_ProtoFile, m_EnumInfoHelper);
                 return new Selection(selected, enumNames[selected]);
             }
 
-            if (newSelected == deleteIndex)
+            if (newSelected == deleteOrUpdateIndex)
             {
                 DeleteEnumWindow.ShowWindow(m_ProtoFile, m_Descriptor.File, m_EnumInfoHelper);
                 return new Selection(selected, enumNames[selected]);

@@ -30,14 +30,9 @@ namespace Google.Android.PerformanceTuner.Editor
 {
     public class NewEnumWindow : EditorWindow
     {
-        public static void ShowWindow(FileInfo protoFile, EnumInfoHelper enumInfoHelper)
+        public static void ShowNewEnumWindow(FileInfo protoFile, EnumInfoHelper enumInfoHelper)
         {
-            var window = ScriptableObject.CreateInstance<NewEnumWindow>();
-            window.titleContent = new GUIContent("New enum");
-            window.position = new Rect(Screen.width / 2f, Screen.height / 2f, 300, 500);
-            window.m_ProtoFile = protoFile;
-            window.m_EnumInfoHelper = enumInfoHelper;
-            window.m_Info = new EnumInfo()
+            var displayInfo = new EnumInfo()
             {
                 name = "NewEnum" + enumInfoHelper.GetAllNames().Count(),
                 values = new List<string>()
@@ -45,7 +40,19 @@ namespace Google.Android.PerformanceTuner.Editor
                     "VALUE_0", "VALUE_1", "VALUE_2"
                 }
             };
+            ShowWindow(protoFile, enumInfoHelper, displayInfo);
+        }
+
+        public static void ShowWindow(FileInfo protoFile, EnumInfoHelper enumInfoHelper, EnumInfo displayInfo)
+        {
+            var window = ScriptableObject.CreateInstance<NewEnumWindow>();
+            window.titleContent = new GUIContent("Add / Update enum");
+            window.position = new Rect(Screen.width / 2f, Screen.height / 2f, 300, 500);
+            window.m_ProtoFile = protoFile;
+            window.m_EnumInfoHelper = enumInfoHelper;
+            window.m_Info = displayInfo;
             window.ShowUtility();
+            window.MakeChecks();
         }
 
         EnumInfo m_Info;
@@ -63,8 +70,7 @@ namespace Google.Android.PerformanceTuner.Editor
             m_EnumList.DoLayoutList();
             if (EditorGUI.EndChangeCheck())
             {
-                m_ErrorMessage = CheckForErrors(m_Info);
-                m_EnumExist = EnumExist(m_Info);
+                MakeChecks();
             }
 
             GUILayout.Space(5);
@@ -92,6 +98,11 @@ namespace Google.Android.PerformanceTuner.Editor
             }
         }
 
+        void MakeChecks()
+        {
+            m_ErrorMessage = CheckForErrors(m_Info);
+            m_EnumExist = EnumExist(m_Info);
+        }
 
         bool EnumExist(EnumInfo info)
         {

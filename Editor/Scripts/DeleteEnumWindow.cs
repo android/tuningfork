@@ -32,7 +32,7 @@ namespace Google.Android.PerformanceTuner.Editor
         public static void ShowWindow(FileInfo protoFile, FileDescriptor fileDescriptor, EnumInfoHelper enumInfoHelper)
         {
             var window = ScriptableObject.CreateInstance<DeleteEnumWindow>();
-            window.titleContent = new GUIContent("Delete Enum");
+            window.titleContent = new GUIContent("Update / Delete Enum");
             window.m_ProtoFile = protoFile;
             window.m_FileDescriptor = fileDescriptor;
             window.m_EnumInfoHelper = enumInfoHelper;
@@ -52,7 +52,7 @@ namespace Google.Android.PerformanceTuner.Editor
             if (enumNames.Length == 0)
             {
                 EditorGUILayout.LabelField(
-                    "Fidelity and Annotation messages don't contain any enums you can delete.",
+                    "Fidelity and Annotation messages don't contain any enums you can update or delete.",
                     EditorStyles.wordWrappedLabel);
                 return;
             }
@@ -60,15 +60,40 @@ namespace Google.Android.PerformanceTuner.Editor
             if (m_EnumToDelete < 0)
             {
                 m_EnumToDelete = 0;
-                m_ErrorMessage = CheckForErrors(enumNames[m_EnumToDelete]);
+                m_ErrorMessage = CheckForDeleteErrors(enumNames[m_EnumToDelete]);
             }
 
             EditorGUI.BeginChangeCheck();
-            m_EnumToDelete = EditorGUILayout.Popup("Select enum to delete", m_EnumToDelete, enumNames);
+            EditorGUILayout.LabelField("Select enum to update or delete");
+            m_EnumToDelete = EditorGUILayout.Popup(m_EnumToDelete, enumNames);
             if (EditorGUI.EndChangeCheck())
             {
-                m_ErrorMessage = CheckForErrors(enumNames[m_EnumToDelete]);
+                m_ErrorMessage = CheckForDeleteErrors(enumNames[m_EnumToDelete]);
             }
+
+
+            GUILayout.Space(10);
+            using (new GUILayout.HorizontalScope())
+            {
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Update Enum", Styles.button, GUILayout.ExpandWidth(false)))
+                {
+                    EnumInfo? enumInfoToUpdate = m_EnumInfoHelper.GetInfo(enumNames[m_EnumToDelete]);
+                    if (enumInfoToUpdate.HasValue)
+                    {
+                        NewEnumWindow.ShowWindow(m_ProtoFile, m_EnumInfoHelper, enumInfoToUpdate.Value);
+                    }
+                    else
+                    {
+                        Debug.LogErrorFormat("Information for [{0}] enum was not found", enumNames[m_EnumToDelete]);
+                        NewEnumWindow.ShowNewEnumWindow(m_ProtoFile, m_EnumInfoHelper);
+                    }
+
+                    this.Close();
+                }
+            }
+
+            GUILayout.Space(10);
 
             if (!string.IsNullOrEmpty(m_ErrorMessage))
             {
@@ -89,7 +114,7 @@ namespace Google.Android.PerformanceTuner.Editor
             EditorGUI.EndDisabledGroup();
         }
 
-        string CheckForErrors(string enumToDelete)
+        string CheckForDeleteErrors(string enumToDelete)
         {
             string errors = string.Empty;
             foreach (var message in m_FileDescriptor.MessageTypes)

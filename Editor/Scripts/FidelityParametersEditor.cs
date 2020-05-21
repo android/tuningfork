@@ -39,9 +39,9 @@ namespace Google.Android.PerformanceTuner.Editor
         readonly GUILayoutOption m_TrendingColumnWidth = GUILayout.Width(100);
         readonly Color m_GuiColour = GUI.color;
 
-        const string k_HelpInfo =
-            "All quality levels are saved into " +
-            "AndroidPerformanceTuner_gen/Editor/AndroidAssets/dev_tuningfork_fidelityparams_*.bin files.\n" +
+        static readonly string k_HelpInfo =
+            "All quality levels are saved into " + Paths.androidAssetsPathName +
+            "/dev_tuningfork_fidelityparams_*.bin files.\n" +
             "You should have at least one quality level.";
 
         readonly TrendHelper m_Helper = new TrendHelper();

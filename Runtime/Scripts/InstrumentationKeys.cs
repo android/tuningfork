@@ -21,14 +21,30 @@
 namespace Google.Android.PerformanceTuner
 {
     /// <summary>
-    ///     Instrumentation key.
+    ///     Instrument keys indicating time periods within a frame.
+    ///     Keys 64000-65535 are reserved
     /// </summary>
     public enum InstrumentationKeys
     {
-        SysCPU = 64000,
-        SysGPU = 64001,
-        SwappyWaitTime = 64002,
-        SwappySwapTime = 64003,
-        UnityFrame = 64000
+        /// <summary>
+        ///     If GPU time is available, this is MAX(CpuTime, GpuTime).
+        ///     If not, this is the same as PacedFrameTime
+        /// </summary>
+        RawFrameTime = 64000,
+
+        /// <summary>
+        ///     Frame time between ends of eglSwapBuffers calls or Vulkan queue present.
+        /// </summary>
+        PacedFrameTime = 64001,
+
+        /// <summary>
+        ///     The time between frame start and the call to Swappy_swap.
+        /// </summary>
+        CpuTime = 64002,
+
+        /// <summary>
+        ///     The time between buffer swap and GPU fence triggering.
+        /// </summary>
+        GpuTime = 64003,
     }
 }

@@ -30,12 +30,15 @@ namespace Google.Android.PerformanceTuner.Editor
         const string k_BasicInfo = "       The scene is used as an annotation.\n" +
                                    "       The annotation is set automatically when active scene is changed.";
 
-        // TODO(kseniia): More detailed information
         const string k_SceneInfo =
-            "This parameter is recognized as a scene parameter.";
+            "This parameter is recognized as a scene parameter. " +
+            "If your game is not using / not matching unity scene system, you can remove it from your annotation.";
 
         const string k_LoadingInfo =
-            "This parameter is recognized as a loading parameter.";
+            "This parameter is recognized as a loading parameter. " +
+            "Loading annotations mark frames that are part of the level loading process. " +
+            "It is highly recommended that you use loading annotations so that slower frames " +
+            "while the game is loading do not affect your overall metrics.";
 
         readonly GUIContent m_SceneFieldInfo;
 
