@@ -43,8 +43,12 @@ namespace Google.Android.PerformanceTuner
         string m_endPoint = null;
         const string k_LocalEndPoint = "http://localhost:9000";
 
+        // For callbacks only.
+        static AndroidPerformanceTuner<TFidelity, TAnnotation> s_Tuner;
+
         public AndroidPerformanceTuner()
         {
+            s_Tuner = this;
             m_Library =
 #if UNITY_ANDROID && !UNITY_EDITOR
                 new AndroidLibraryMethods();
@@ -284,17 +288,17 @@ namespace Google.Android.PerformanceTuner
         }
 
 
-        void UploadCallbackImpl(IntPtr bytes, uint size)
+        static void UploadCallbackImpl(IntPtr bytes, uint size)
         {
-            if (onReceiveUploadLog == null) return;
-            m_UploadTelemetryRequest = UploadTelemetryRequest.Parse(bytes, size);
+            if (s_Tuner == null || s_Tuner.onReceiveUploadLog == null) return;
+            s_Tuner.m_UploadTelemetryRequest = UploadTelemetryRequest.Parse(bytes, size);
         }
 
-        void FidelityParamsCallbackImpl(CProtobufSerialization ps)
+        static void FidelityParamsCallbackImpl(CProtobufSerialization ps)
         {
-            if (onReceiveFidelityParameters == null) return;
             // Don't call OnReceiveFidelityParameters directly from this thread.
-            m_ReceivedFidelityParameters = ps.ParseMessage<TFidelity>();
+            if (s_Tuner == null || s_Tuner.onReceiveFidelityParameters == null) return;
+            s_Tuner.m_ReceivedFidelityParameters = ps.ParseMessage<TFidelity>();
         }
     }
 
@@ -303,14 +307,18 @@ namespace Google.Android.PerformanceTuner
         internal static Action<CProtobufSerialization> onFidelityParamsReceived;
         internal static Action<IntPtr, uint> onUploadReceived;
 
-        // These callbacks must be static as il2cpp can not marshall non-static delegates.
+        // These callbacks must be
+        // * static as il2cpp can not marshall non-static delegates.
+        // * non-generic
         [MonoPInvokeCallback(typeof(FidelityParamsCallback))]
         internal static void FidelityParamsCallbackImpl(ref CProtobufSerialization ps)
         {
             if (onFidelityParamsReceived != null) onFidelityParamsReceived(ps);
         }
 
-        // These callbacks must be static as il2cpp can not marshall non-static delegates.
+        // These callbacks must be
+        // * static as il2cpp can not marshall non-static delegates.
+        // * non-generic
         [MonoPInvokeCallback(typeof(UploadCallback))]
         internal static void UploadCallbackImpl(IntPtr bytes, uint size)
         {

@@ -18,6 +18,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Text.RegularExpressions;
 using Google.Protobuf.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -86,7 +87,10 @@ namespace Google.Android.PerformanceTuner.Editor
                 textRect.width = blockWidth;
             }
 
-            info.name = EditorGUI.TextField(textRect, info.name);
+            // String should contain only a-z, A-Z, numbers and '_' symbols.
+            string input = EditorGUI.TextField(textRect, info.name);
+            info.name = Regex.Replace(input, "[^a-zA-Z0-9_]", "");
+
             return info;
         }
 

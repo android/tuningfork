@@ -166,19 +166,33 @@ namespace Google.Android.PerformanceTuner
         /// </summary>
         DownloadThreadAlreadyStarted = 27,
 
+        // PlatformNotSupported = 28 is obsolete.
+
+        /// <summary>
+        ///     An error occurred parsing the response to generateTuningParameters.
+        /// </summary>
+        GenerateTuningParametersError = 29,
+
+        /// <summary>
+        ///     The response from generateTuningParameters was not a success code.
+        /// </summary>
+        GenerateTuningParametersResponseNotSuccess = 30,
+
+        // Unity only codes have reserved range 100-150
+
         /// <summary>
         ///     The game or app is run on a platform not supporting Tuning fork.
         /// </summary>
-        PlatformNotSupported = 28,
+        PlatformNotSupported = 100,
 
         /// <summary>
         ///     Fidelity message is invalid.
         /// </summary>
-        InvalidFidelity = 29,
+        InvalidFidelity = 101,
 
         /// <summary>
         ///     Using incorrect API for default/custom modes.
         /// </summary>
-        InvalidMode = 30,
+        InvalidMode = 102,
     }
 }

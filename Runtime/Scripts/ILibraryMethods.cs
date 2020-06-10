@@ -59,5 +59,7 @@ namespace Google.Android.PerformanceTuner
         ErrorCode StartTrace(InstrumentationKeys key, ref UInt64 handle);
 
         ErrorCode EndTrace(UInt64 handle);
+
+        ErrorCode EnableMemoryRecording(bool enable);
     }
 }

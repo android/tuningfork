@@ -233,5 +233,20 @@ namespace Google.Android.PerformanceTuner
                              "Don't set fidelity parameters when default fidelity parameters enabled");
             return ErrorCode.InvalidMode;
         }
+
+        /// <summary>
+        ///     Enable or disable memory telemetry recording.
+        ///     By default, memory telemetry recording is turned *off* at initialization and currently the memory
+        ///     statistics are not shown in the Google Play Console. It is not recommended to enable it.
+        /// </summary>
+        /// <param name="enabled">If true, memory recording is enabled, if false it is disabled</param>
+        /// <returns>
+        ///      <see cref="ErrorCode.Ok"/> if memory recording successfully enabled or disabled.
+        ///      <see cref="ErrorCode.TuningforkNotInitialized"/> if plugin is not initialized.
+        /// </returns>
+        public ErrorCode EnableMemoryRecording(bool enabled)
+        {
+            return m_Library.EnableMemoryRecording(enabled);
+        }
     }
 }

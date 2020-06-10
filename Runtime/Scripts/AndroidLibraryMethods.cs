@@ -143,6 +143,14 @@ namespace Google.Android.PerformanceTuner
         {
             return (ErrorCode) TuningFork_endTrace(handle);
         }
+
+        [DllImport(PerformanceTuner)]
+        static extern int TuningFork_enableMemoryRecording(bool handle);
+
+        public ErrorCode EnableMemoryRecording(bool enable)
+        {
+            return (ErrorCode) TuningFork_enableMemoryRecording(enable);
+        }
     }
 }
 #endif

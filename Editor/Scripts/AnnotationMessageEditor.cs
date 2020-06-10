@@ -18,6 +18,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using Google.Android.PerformanceTuner.Editor.Proto;
@@ -99,7 +100,9 @@ namespace Google.Android.PerformanceTuner.Editor
             Selection selection = RenderEnumSelection(enumRect, info.enumTypeIndex);
             info.enumTypeIndex = selection.id;
             info.enumType = selection.name;
-            info.name = EditorGUI.TextField(textRect, info.name);
+            string input = EditorGUI.TextField(textRect, info.name);
+            // String should contain only a-z, A-Z, numbers and '_' symbols.
+            info.name = Regex.Replace(input, "[^a-zA-Z0-9_]", "");
             return info;
         }
 

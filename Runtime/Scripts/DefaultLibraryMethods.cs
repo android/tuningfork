@@ -93,6 +93,11 @@ namespace Google.Android.PerformanceTuner
         {
             return ErrorCode.PlatformNotSupported;
         }
+
+        public ErrorCode EnableMemoryRecording(bool enable)
+        {
+            return ErrorCode.PlatformNotSupported;
+        }
     }
 }
 #endif
