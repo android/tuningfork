@@ -5,11 +5,11 @@ Android Performance Tuner is a library to help developers measure frame renderin
 
 ## Quick Start
 
-See the [Getting Started with Unity](//developers.google.com/games/sdk/performance-tuner/unity) developer guide.
+See the [Getting Started with Unity](https://developer.android.com/games/sdk/performance-tuner/unity) developer guide.
 
 ## API Reference
 
-See the [Android Performance Tuner for Unity API Reference](//developers.google.com/games/sdk/reference/performance-tuner/unity).
+See the [Android Performance Tuner for Unity API Reference](https://developer.android.com/games/sdk/reference/performance-tuner/unity).
 
 ## Release Notes
 
