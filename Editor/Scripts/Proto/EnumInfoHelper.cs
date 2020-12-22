@@ -99,6 +99,7 @@ namespace Google.Android.PerformanceTuner.Editor.Proto
                 if (scene == null || string.IsNullOrEmpty(scene.path)) continue;
                 var sceneName = scene.path
                     .Replace(Path.DirectorySeparatorChar, '_')
+                    .Replace(Path.AltDirectorySeparatorChar, '_')
                     .Replace(Path.GetExtension(scene.path), "")
                     .Replace(" ", "_")
                     .ToUpper();
