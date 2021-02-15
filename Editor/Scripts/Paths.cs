@@ -123,6 +123,13 @@ namespace Google.Android.PerformanceTuner.Editor
         public static readonly string devCsOutDirectoryPath =
             Path.Combine(k_GeneratedFilesDirectory, "Runtime", "Scripts");
 
+
+        /// <summary>
+        ///     Path to Google.Android.PerformanceTuner_gen.asmdef file.
+        /// </summary>
+        public static readonly string asmdefPath =
+            Path.Combine(k_GeneratedFilesDirectory, "Runtime", "Google.Android.PerformanceTuner_gen.asmdef");
+
         /// <summary>
         ///     Path to dev_tuningfork.descriptor file.
         /// </summary>

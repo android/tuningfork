@@ -46,6 +46,8 @@ namespace Google.Android.PerformanceTuner
         [FormerlySerializedAs("UseAdvancedAnnotations")]
         public bool useAdvancedAnnotations;
 
+        public TunerMode mode = TunerMode.Insights;
+
         public bool GetUseAdvanced(ProtoMessageType type)
         {
             switch (type)

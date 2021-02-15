@@ -26,10 +26,30 @@ namespace Google.Android.PerformanceTuner
     public class FrameTracer : MonoBehaviour
     {
         public Action onAppInBackground;
+        public Action<LifecycleState> onLifecycleChanged;
+
+        LifecycleState currentLifecycleState
+        {
+            set
+            {
+                if (onLifecycleChanged != null) onLifecycleChanged(value);
+            }
+        }
+
+        void Awake()
+        {
+            currentLifecycleState = LifecycleState.OnCreate;
+        }
 
         void OnApplicationPause(bool pauseStatus)
         {
             if (onAppInBackground != null && pauseStatus) onAppInBackground();
+            currentLifecycleState = pauseStatus ? LifecycleState.OnStop : LifecycleState.OnStart;
+        }
+
+        void OnDestroy()
+        {
+            currentLifecycleState = LifecycleState.OnDestroy;
         }
     }
 }

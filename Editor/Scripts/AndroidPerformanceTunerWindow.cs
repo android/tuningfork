@@ -25,12 +25,31 @@ namespace Google.Android.PerformanceTuner.Editor
 {
     public class AndroidPerformanceTunerWindow : EditorWindow
     {
-        [MenuItem("Google/Android Performance Tuner")]
+        [MenuItem("Window/Android Performance Tuner/Setup", false, 1)]
         public static void ShowWindow()
         {
             var window = EditorWindow.GetWindow(typeof(AndroidPerformanceTunerWindow),
                 false, k_WindowName) as AndroidPerformanceTunerWindow;
             window.OnEnable();
+        }
+
+        [MenuItem("Window/Android Performance Tuner/Codelab", false, 20)]
+        public static void OpenCodelab()
+        {
+            Application.OpenURL("https://developer.android.com/codelabs/android-performance-tuner-unity");
+        }
+
+        [MenuItem("Window/Android Performance Tuner/Documentation", false, 20)]
+        public static void OpenDocumentation()
+        {
+            Application.OpenURL("https://developer.android.com/games/sdk/performance-tuner/unity");
+        }
+
+
+        [MenuItem("Window/Android Performance Tuner/Github", false, 20)]
+        public static void OpenGithub()
+        {
+            Application.OpenURL("https://github.com/android/tuningfork");
         }
 
         const string k_WindowName =

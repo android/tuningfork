@@ -31,6 +31,11 @@ namespace Google.Android.PerformanceTuner
             return ErrorCode.PlatformNotSupported;
         }
 
+        public ErrorCode InitWithSettings(ref CInitializationSettings settings)
+        {
+            return ErrorCode.PlatformNotSupported;
+        }
+
         public ErrorCode GetFidelityParameters(
             ref CProtobufSerialization defaultParameters,
             ref CProtobufSerialization parameters,
@@ -95,6 +100,36 @@ namespace Google.Android.PerformanceTuner
         }
 
         public ErrorCode EnableMemoryRecording(bool enable)
+        {
+            return ErrorCode.PlatformNotSupported;
+        }
+
+        public ErrorCode StartRecordingLoadingTime(
+            IntPtr eventMetadata,
+            uint eventMetadataSize,
+            ref CProtobufSerialization annotation,
+            ref ulong handle)
+        {
+            return ErrorCode.PlatformNotSupported;
+        }
+
+        public ErrorCode StopRecordingLoadingTime(ulong handle)
+        {
+            return ErrorCode.PlatformNotSupported;
+        }
+
+        public ErrorCode ReportLifecycleEvent(LifecycleState state)
+        {
+            return ErrorCode.PlatformNotSupported;
+        }
+
+        public ErrorCode StartLoadingGroup(IntPtr eventMetadata, uint eventMetadataSize,
+            IntPtr annotation, ref ulong handle)
+        {
+            return ErrorCode.PlatformNotSupported;
+        }
+
+        public ErrorCode StopLoadingGroup(ulong handle)
         {
             return ErrorCode.PlatformNotSupported;
         }

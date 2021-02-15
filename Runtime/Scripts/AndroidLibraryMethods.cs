@@ -42,6 +42,14 @@ namespace Google.Android.PerformanceTuner
         }
 
         [DllImport(PerformanceTuner)]
+        static extern int Unity_TuningFork_init_with_settings(ref CInitializationSettings settings);
+
+        public ErrorCode InitWithSettings(ref CInitializationSettings settings)
+        {
+            return (ErrorCode) Unity_TuningFork_init_with_settings(ref settings);
+        }
+
+        [DllImport(PerformanceTuner)]
         static extern int TuningFork_getFidelityParameters(
             ref CProtobufSerialization defaultParameters,
             ref CProtobufSerialization parameters,
@@ -150,6 +158,64 @@ namespace Google.Android.PerformanceTuner
         public ErrorCode EnableMemoryRecording(bool enable)
         {
             return (ErrorCode) TuningFork_enableMemoryRecording(enable);
+        }
+
+        [DllImport(PerformanceTuner)]
+        static extern int TuningFork_startRecordingLoadingTime(
+            IntPtr eventMetadata,
+            uint eventMetadataSize,
+            ref CProtobufSerialization annotation,
+            ref ulong handle);
+
+        public ErrorCode StartRecordingLoadingTime(
+            IntPtr eventMetadataPtr,
+            uint eventMetadataSize,
+            ref CProtobufSerialization annotation,
+            ref ulong handle)
+        {
+            return (ErrorCode) TuningFork_startRecordingLoadingTime(
+                eventMetadataPtr, eventMetadataSize, ref annotation, ref handle);
+        }
+
+        [DllImport(PerformanceTuner)]
+        static extern int TuningFork_stopRecordingLoadingTime(ulong handle);
+
+        public ErrorCode StopRecordingLoadingTime(ulong handle)
+        {
+            return (ErrorCode) TuningFork_stopRecordingLoadingTime(handle);
+        }
+
+        [DllImport(PerformanceTuner)]
+        static extern int TuningFork_reportLifecycleEvent(LifecycleState state);
+
+        public ErrorCode ReportLifecycleEvent(LifecycleState state)
+        {
+            return (ErrorCode) TuningFork_reportLifecycleEvent(state);
+        }
+
+        [DllImport(PerformanceTuner)]
+        static extern int TuningFork_startLoadingGroup(
+            IntPtr eventMetadata,
+            uint eventMetadataSize,
+            IntPtr annotation,
+            ref ulong handle);
+
+        public ErrorCode StartLoadingGroup(IntPtr eventMetadataPtr, uint eventMetadataSize,
+            IntPtr annotationPtr, ref ulong handle)
+        {
+            return (ErrorCode) TuningFork_startLoadingGroup(
+                eventMetadataPtr,
+                eventMetadataSize,
+                annotationPtr,
+                ref handle);
+        }
+
+        [DllImport(PerformanceTuner)]
+        static extern int TuningFork_stopLoadingGroup(ulong handle);
+
+        public ErrorCode StopLoadingGroup(ulong handle)
+        {
+            return (ErrorCode) TuningFork_stopLoadingGroup(handle);
         }
     }
 }

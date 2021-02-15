@@ -66,6 +66,36 @@ namespace Google.Android.PerformanceTuner
             return m_LibraryMethods.Init(fidelityParamsCallback, trainingFidelityParametersPtr, endpointUrlOverridePtr);
         }
 
+        public ErrorCode InitWithSettings(InitializationSettings settings)
+        {
+            CInitializationSettings cSettings = new CInitializationSettings()
+            {
+                persistent_cache = IntPtr.Zero, // Using default one.
+                swappy_tracer_fn = null, // It will be set by native library.
+                fidelity_params_callback = settings.fidelityParamsCallback,
+                training_fidelity_params = IntPtr.Zero,
+                endpoint_uri_override = IntPtr.Zero,
+                swappy_version = 0, // It will be set by native library.
+                max_num_metrics = settings.maxNumMetrics
+            };
+
+            if (settings.trainingFidelityParams != null)
+            {
+                CProtobufSerialization cs = CProtobufSerialization.Create(settings.trainingFidelityParams);
+                cSettings.training_fidelity_params = Marshal.AllocHGlobal(Marshal.SizeOf(cs));
+                Marshal.StructureToPtr(cs, cSettings.training_fidelity_params, true);
+                m_Ptrs.Add(cSettings.training_fidelity_params);
+            }
+
+            if (!string.IsNullOrEmpty(settings.endpointUriOverride))
+            {
+                cSettings.endpoint_uri_override = Marshal.StringToHGlobalAnsi(settings.endpointUriOverride);
+                m_Ptrs.Add(cSettings.endpoint_uri_override);
+            }
+
+            return m_LibraryMethods.InitWithSettings(ref cSettings);
+        }
+
         public Result<TFidelity> FindFidelityParametersInApk(string filename)
         {
             var ps = new CProtobufSerialization();
@@ -116,6 +146,69 @@ namespace Google.Android.PerformanceTuner
             var errorCode = m_LibraryMethods.SetFidelityParameters(ref ps);
             CProtobufSerialization.CallDealloc(ref ps);
             return errorCode;
+        }
+
+        public Result<ulong> StartRecordingLoadingTime(LoadingTimeMetadata metadata, TAnnotation annotation)
+        {
+            IntPtr metadataPtr = IntPtr.Zero;
+            uint metadataSize = 0;
+            if (metadata != null)
+            {
+                metadataSize = (uint) Marshal.SizeOf(metadata);
+                metadataPtr = Marshal.AllocHGlobal(Marshal.SizeOf(metadata));
+                Marshal.StructureToPtr(metadata, metadataPtr, false);
+            }
+
+            var ps = CProtobufSerialization.Create(annotation);
+            ulong handle = 0;
+            var errorCode = m_LibraryMethods.StartRecordingLoadingTime(
+                metadataPtr, metadataSize, ref ps, ref handle);
+            CProtobufSerialization.CallDealloc(ref ps);
+
+            if (metadataPtr != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(metadataPtr);
+            }
+
+            return new Result<ulong>(errorCode, handle);
+        }
+
+        public Result<ulong> StartLoadingGroup(LoadingTimeMetadata metadata, TAnnotation annotation)
+        {
+            IntPtr metadataPtr = IntPtr.Zero;
+            uint metadataSize = 0;
+            if (metadata != null)
+            {
+                metadataPtr = Marshal.AllocHGlobal(Marshal.SizeOf(metadata));
+                metadataSize = (uint) Marshal.SizeOf(metadata);
+                Marshal.StructureToPtr(metadata, metadataPtr, false);
+            }
+
+            IntPtr annotationPtr = IntPtr.Zero;
+            CProtobufSerialization ps = new CProtobufSerialization();
+            if (annotation != null)
+            {
+                ps = CProtobufSerialization.Create(annotation);
+                annotationPtr = Marshal.AllocHGlobal(Marshal.SizeOf(ps));
+                Marshal.StructureToPtr(ps, annotationPtr, false);
+            }
+
+            ulong handle = 0;
+            var errorCode = m_LibraryMethods.StartLoadingGroup(
+                metadataPtr, metadataSize, annotationPtr, ref handle);
+
+            if (metadataPtr != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(metadataPtr);
+            }
+
+            if (annotationPtr != IntPtr.Zero)
+            {
+                CProtobufSerialization.CallDealloc(ref ps);
+                Marshal.FreeHGlobal(annotationPtr);
+            }
+
+            return new Result<ulong>(errorCode, handle);
         }
     }
 }

@@ -26,12 +26,21 @@ namespace Google.Android.PerformanceTuner
 
     public delegate void UploadCallback(IntPtr data, UInt32 size);
 
+    public delegate void SwappyTracerFn(ref SwappyTracer swappyTracer);
+
+    public struct SwappyTracer
+    {
+    }
+
     public interface ILibraryMethods
     {
         ErrorCode Init(
             FidelityParamsCallback setFidelityParams,
             IntPtr trainingFidelityParameters,
             IntPtr endpointUrlOverride);
+
+        ErrorCode InitWithSettings(
+            ref CInitializationSettings settings);
 
         ErrorCode GetFidelityParameters(
             ref CProtobufSerialization defaultParameters,
@@ -61,5 +70,20 @@ namespace Google.Android.PerformanceTuner
         ErrorCode EndTrace(UInt64 handle);
 
         ErrorCode EnableMemoryRecording(bool enable);
+
+        ErrorCode StartRecordingLoadingTime(
+            IntPtr eventMetadataPtr,
+            uint eventMetadataSize,
+            ref CProtobufSerialization annotation,
+            ref ulong handle);
+
+        ErrorCode StopRecordingLoadingTime(ulong handle);
+
+        ErrorCode ReportLifecycleEvent(LifecycleState state);
+
+        ErrorCode StartLoadingGroup(IntPtr eventMetadataPtr, uint eventMetadataSize, IntPtr annotationPtr,
+            ref ulong handle);
+
+        ErrorCode StopLoadingGroup(ulong handle);
     }
 }

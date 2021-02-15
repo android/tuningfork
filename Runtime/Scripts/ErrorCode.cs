@@ -178,6 +178,34 @@ namespace Google.Android.PerformanceTuner
         /// </summary>
         GenerateTuningParametersResponseNotSuccess = 30,
 
+        /// <summary>
+        ///     Not enough space for metric data was allocated at start-up: increase Settings.max_num_metrics.loading_time
+        /// </summary>
+        NoMoreSpaceForLoadingTimeData = 31,
+
+
+        /// <summary>
+        ///     Not enough space for metric data was allocated at start-up:
+        ///     increase Settings.max_num_metrics.frame_time or check max_num_instrument_keys
+        /// </summary>
+        NoMoreSpaceForFrameData = 32,
+
+        /// <summary>
+        ///     Invalid handle passed to `TuningFork_startRecordingLoadingTime`.
+        /// </summary>
+        InvalidLoadingHandle = 33,
+
+        /// <summary>
+        ///     TuningFork_startRecordingLoadingTime was called with the same parameters twice without a stop function inbetween.
+        /// </summary>
+        DuplicateStartLoadingEvent = 34,
+
+        /// <summary>
+        ///     An HTTP request could not be made because there is no unmetered connection available.
+        /// </summary>
+        MeteredConnectionDisallowed = 35,
+
+
         // Unity only codes have reserved range 100-150
 
         /// <summary>

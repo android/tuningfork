@@ -24,6 +24,7 @@ using AOT;
 using Google.Protobuf;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Scripting;
 
 namespace Google.Android.PerformanceTuner
 {
@@ -41,6 +42,7 @@ namespace Google.Android.PerformanceTuner
         FrameTracer m_SceneObject;
         SetupConfig m_SetupConfig;
         string m_endPoint = null;
+        MetricLimits m_MetricLimits;
         const string k_LocalEndPoint = "http://localhost:9000";
 
         // For callbacks only.
@@ -85,15 +87,21 @@ namespace Google.Android.PerformanceTuner
             if (fidelityStatus != ErrorCode.Ok) return fidelityStatus;
 
 
-            IMessage defaultQualityParameters = null;
+            InitializationSettings settings = new InitializationSettings();
+
             if (!m_SetupConfig.useAdvancedFidelityParameters)
             {
-                defaultQualityParameters = new TFidelity();
-                MessageUtil.SetQualityLevel(defaultQualityParameters, QualitySettings.GetQualityLevel());
+                settings.trainingFidelityParams = new TFidelity();
+                MessageUtil.SetQualityLevel(settings.trainingFidelityParams, QualitySettings.GetQualityLevel());
             }
 
-            var errorCode = m_AdditionalLibraryMethods.Init(Callbacks.FidelityParamsCallbackImpl,
-                defaultQualityParameters, m_endPoint);
+            settings.endpointUriOverride = m_endPoint;
+            if (m_SetupConfig.mode == TunerMode.Experiments)
+                settings.fidelityParamsCallback = Callbacks.FidelityParamsCallbackImpl;
+            settings.maxNumMetrics = m_MetricLimits;
+
+
+            var errorCode = m_AdditionalLibraryMethods.InitWithSettings(settings);
 
             if (errorCode != ErrorCode.Ok)
             {
@@ -110,10 +118,21 @@ namespace Google.Android.PerformanceTuner
             if (!m_SetupConfig.useAdvancedAnnotations) EnableDefaultAnnotationsMode();
             if (!m_SetupConfig.useAdvancedFidelityParameters) EnableDefaultFidelityMode();
 
-            AddUploadCallback();
             AddAutoFlush();
+            AddAutoLifecycleUpdate();
+            CheckNetworkReachability();
 
             return errorCode;
+        }
+
+        /// <summary>
+        ///     Required to add android.permission.ACCESS_NETWORK_STATE permission to AndroidManifest.
+        /// </summary>
+        [Preserve]
+        void CheckNetworkReachability()
+        {
+            var internetReachability = Application.internetReachability;
+            Debug.LogFormat("internet reachability is {0}", internetReachability);
         }
 
         ErrorCode CheckAnnotationMessage(SetupConfig config)
@@ -157,12 +176,13 @@ namespace Google.Android.PerformanceTuner
             m_OnStop += () => { SceneManager.activeSceneChanged -= OnSceneChanged; };
         }
 
-        void AddUploadCallback()
+        ErrorCode AddUploadCallback()
         {
             var errorCode = m_Library.SetUploadCallback(Callbacks.UploadCallbackImpl);
             if (errorCode != ErrorCode.Ok)
                 Debug.LogWarningFormat("Android Performance Tuner: Could not set upload callback, status {0}",
                     errorCode);
+            return errorCode;
         }
 
         void AddAutoFlush()
@@ -172,6 +192,19 @@ namespace Google.Android.PerformanceTuner
                 ErrorCode code = m_Library.Flush();
                 Debug.LogFormat("Flush in background {0}", code);
             };
+        }
+
+        void AddAutoLifecycleUpdate()
+        {
+            m_Library.ReportLifecycleEvent(LifecycleState.OnCreate);
+            m_Library.ReportLifecycleEvent(LifecycleState.OnStart);
+            m_SceneObject.onLifecycleChanged += (state) =>
+            {
+                ErrorCode code = m_Library.ReportLifecycleEvent(state);
+                if (code != ErrorCode.Ok)
+                    Debug.LogFormat("ReportLifecycleEvent({0}) errorCode is {1}", state, code);
+            };
+            m_OnStop += () => { m_Library.ReportLifecycleEvent(LifecycleState.OnDestroy); };
         }
 
         void EnableDefaultFidelityMode()
@@ -218,7 +251,9 @@ namespace Google.Android.PerformanceTuner
             var annotation = new TAnnotation();
             MessageUtil.SetScene(annotation, to.buildIndex);
             MessageUtil.SetLoadingState(annotation, m_DefaultAnnotationLoadingState);
-            m_AdditionalLibraryMethods.SetCurrentAnnotation(annotation);
+            var errorCode = m_AdditionalLibraryMethods.SetCurrentAnnotation(annotation);
+            if (errorCode != ErrorCode.Ok)
+                Debug.LogErrorFormat("SetCurrentAnnotation({0}) result is {1}", annotation, errorCode);
         }
 
         ErrorCode SetDefaultAnnotation(MessageUtil.LoadingState state)
@@ -227,7 +262,10 @@ namespace Google.Android.PerformanceTuner
             MessageUtil.SetScene(annotation, SceneManager.GetActiveScene().buildIndex);
             MessageUtil.SetLoadingState(annotation, state);
             m_DefaultAnnotationLoadingState = state;
-            return m_AdditionalLibraryMethods.SetCurrentAnnotation(annotation);
+            var errorCode = m_AdditionalLibraryMethods.SetCurrentAnnotation(annotation);
+            if (errorCode != ErrorCode.Ok)
+                Debug.LogErrorFormat("SetCurrentAnnotation({0}) result is {1}", annotation, errorCode);
+            return errorCode;
         }
 
 
@@ -254,7 +292,9 @@ namespace Google.Android.PerformanceTuner
                     currentLevel = QualitySettings.GetQualityLevel();
                     TFidelity message = new TFidelity();
                     MessageUtil.SetQualityLevel(message, QualitySettings.GetQualityLevel());
-                    m_AdditionalLibraryMethods.SetFidelityParameters(message);
+                    var errorCode = m_AdditionalLibraryMethods.SetFidelityParameters(message);
+                    if (errorCode != ErrorCode.Ok)
+                        Debug.LogErrorFormat("SetFidelityParameters({0}) result is {1}", message, errorCode);
                 }
             }
         }

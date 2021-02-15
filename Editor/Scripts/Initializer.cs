@@ -64,6 +64,8 @@ namespace Google.Android.PerformanceTuner.Editor
 
             protoFile = CreateProtoFile(devDescriptor);
 
+            CreateAsmdefFile();
+
             projectData = new ProjectData();
             projectData.LoadFromStreamingAssets(devDescriptor);
 
@@ -78,7 +80,10 @@ namespace Google.Android.PerformanceTuner.Editor
             if (!FidelityBuilder.builder.valid)
             {
                 initMessage = "Fidelity message is not generated yet or your project is still compiling. " +
-                              "If this message persists, try to re-import the plugin and generated assets.";
+                              "If this message persists, try to re-import the plugin and generated assets." +
+                              "\n[macOS] Check if protoc compiler can be opened. " +
+                              "In the Finder locate protoc binary in AndroidPerformanceTuner/Editor/Protoc, " +
+                              "control-click the binary, choose Open and then click Open. ";
                 Debug.Log(initMessage);
                 valid = false;
                 return;
@@ -156,6 +161,22 @@ namespace Google.Android.PerformanceTuner.Editor
             }
 
             return protoFile;
+        }
+
+        const string k_AsmdefContent =
+            "{\"name\": \"Google.Android.PerformanceTuner_gen\"," +
+            "\"references\": [\"Google.Android.PerformanceTuner\"]," +
+            "\"optionalUnityReferences\": [],\"includePlatforms\": []," +
+            "\"excludePlatforms\": [],\"allowUnsafeCode\": false," +
+            "\"overrideReferences\": false,\"precompiledReferences\": [\"Google.Protobuf.dll\"], " +
+            "\"autoReferenced\": true,\"defineConstraints\": []}";
+
+        static void CreateAsmdefFile()
+        {
+            if (File.Exists(Paths.asmdefPath)) return;
+            Debug.LogFormat("Creating Google.Android.PerformanceTuner_gen.asmdef file...\n {0}", Paths.asmdefPath);
+            Directory.CreateDirectory(Path.GetDirectoryName(Paths.asmdefPath));
+            File.WriteAllText(Paths.asmdefPath, k_AsmdefContent);
         }
 
         /// <summary>
