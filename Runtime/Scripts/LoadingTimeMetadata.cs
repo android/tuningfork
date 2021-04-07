@@ -81,7 +81,7 @@ namespace Google.Android.PerformanceTuner
             DeviceStorage = 3,
 
             /// <summary>
-            ///     Reading assets from external storage, e.g. SD card.
+            ///     Reading assets from external storage, for example SD card.
             /// </summary>
             ExternalStorage = 4,
 
