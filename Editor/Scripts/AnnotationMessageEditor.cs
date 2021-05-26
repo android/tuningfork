@@ -35,11 +35,6 @@ namespace Google.Android.PerformanceTuner.Editor
             "This parameter is recognized as a scene parameter. " +
             "If your game is not using / not matching unity scene system, you can remove it from your annotation.";
 
-        const string k_LoadingInfo =
-            "This parameter is recognized as a loading parameter. " +
-            "Loading annotations mark frames that are part of the level loading process. " +
-            "It is highly recommended that you use loading annotations so that slower frames " +
-            "while the game is loading do not affect your overall metrics.";
 
         readonly GUIContent m_SceneFieldInfo;
 
@@ -58,8 +53,10 @@ namespace Google.Android.PerformanceTuner.Editor
             get { return m_Headers; }
         }
 
-        public AnnotationMessageEditor(SetupConfig config, FileInfo protoFile, MessageDescriptor descriptor,
+        public AnnotationMessageEditor(ProjectData projectData, SetupConfig config, FileInfo protoFile,
+            MessageDescriptor descriptor,
             EnumInfoHelper enumInfoHelper) : base(
+            projectData,
             config,
             descriptor,
             ProtoMessageType.Annotation,
@@ -68,8 +65,27 @@ namespace Google.Android.PerformanceTuner.Editor
             enumInfoHelper)
         {
             var icon = (Texture) Resources.Load("baseline_info_outline");
+            var error = (Texture) Resources.Load("ic_error_outline");
             m_SceneFieldInfo = new GUIContent(icon, k_SceneInfo);
-            m_LoadingFieldInfo = new GUIContent(icon, k_LoadingInfo);
+            m_LoadingFieldInfo = new GUIContent(error, Names.removeLoadingStateTooltip);
+        }
+
+        public override void OnGUI()
+        {
+            if (!m_Config.useAdvancedAnnotations && m_ProjectData.hasLoadingState)
+            {
+                GUILayout.Space(15);
+                GUILayout.BeginHorizontal();
+                EditorGUILayout.HelpBox(Names.fixDefaultAnnotationMessage, MessageType.Error);
+                if (GUILayout.Button("Fix"))
+                {
+                    SaveState();
+                }
+
+                GUILayout.EndHorizontal();
+            }
+
+            base.OnGUI();
         }
 
         protected override FieldInfo RenderInfo(FieldInfo info, Rect rect, int index)

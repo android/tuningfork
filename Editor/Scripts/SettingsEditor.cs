@@ -33,10 +33,6 @@ namespace Google.Android.PerformanceTuner.Editor
             "To get better frame rate in your game turn on frame pacing optimization in" +
             " Player->Resolution and Presentation->Optimized Frame Pacing.";
 
-        static readonly string k_LoadingWarning =
-            "Loading annotations mark frames that are part of the level loading process. " +
-            "It is highly recommended that you use loading annotations so that slower frames " +
-            "while the game is loading do not affect your overall metrics.";
 
         public SettingsEditor(ProjectData projectData, SetupConfig setupConfig)
         {
@@ -59,6 +55,7 @@ namespace Google.Android.PerformanceTuner.Editor
         StatusContent m_FidelityModeStatus;
         StatusContent m_AnnotationModeStatus;
         StatusContent m_LoadingAnnotationStatus;
+        GUIContent m_NoFidelityMessages;
 
         void LoadStyles()
         {
@@ -82,8 +79,12 @@ namespace Google.Android.PerformanceTuner.Editor
                 new GUIContent("Using default annotation", textureDone));
 
             m_LoadingAnnotationStatus = new StatusContent(
-                new GUIContent("A loading state annotation is present", textureDone),
-                new GUIContent("A loading state annotation is missing.", textureError));
+                new GUIContent("Remove loading state from custom annotation", textureError,
+                    Names.removeLoadingStateTooltip),
+                new GUIContent("Remove loading state from default annotation", textureError,
+                    Names.removeLoadingStateTooltip));
+
+            m_NoFidelityMessages = new GUIContent("Number of quality levels is 0", textureError);
         }
 
         void RenderPluginStatus()
@@ -97,13 +98,25 @@ namespace Google.Android.PerformanceTuner.Editor
             }
 
             GUILayout.Space(10);
+            EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(m_ApiStatus[string.IsNullOrEmpty(m_ProjectData.apiKey)]);
+            if (GUILayout.Button("Get API Key", Styles.button, GUILayout.ExpandWidth(false)))
+            {
+                Application.OpenURL("https://developer.android.com/games/sdk/performance-tuner/unity/enable-api#steps");
+            }
+
+            EditorGUILayout.EndHorizontal();
             EditorGUILayout.LabelField(m_FidelityModeStatus[m_SetupConfig.useAdvancedFidelityParameters]);
             EditorGUILayout.LabelField(m_AnnotationModeStatus[m_SetupConfig.useAdvancedAnnotations]);
-            EditorGUILayout.LabelField(m_LoadingAnnotationStatus[m_ProjectData.hasLoadingState]);
-            if (!m_ProjectData.hasLoadingState)
+
+            if (m_ProjectData.hasLoadingState)
             {
-                EditorGUILayout.HelpBox(k_LoadingWarning, MessageType.Warning);
+                EditorGUILayout.LabelField(m_LoadingAnnotationStatus[m_SetupConfig.useAdvancedAnnotations]);
+            }
+
+            if (m_SetupConfig.useAdvancedFidelityParameters && m_ProjectData.messages.Count == 0)
+            {
+                EditorGUILayout.LabelField(m_NoFidelityMessages);
             }
         }
 

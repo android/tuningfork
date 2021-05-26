@@ -83,7 +83,8 @@ namespace Google.Android.PerformanceTuner.Editor
         EditorState m_EditorState;
         EditorState m_SavedEditorState;
 
-        readonly SetupConfig m_Config;
+        protected readonly ProjectData m_ProjectData;
+        protected readonly SetupConfig m_Config;
         readonly EditorStatePrefs<EditorState> m_EditorStatePrefs;
         readonly ProtoMessageType m_MessageType;
         readonly MessageDescriptor m_Descriptor;
@@ -98,6 +99,7 @@ namespace Google.Android.PerformanceTuner.Editor
         }
 
         protected MessageEditor(
+            ProjectData projectData,
             SetupConfig config,
             MessageDescriptor descriptor,
             ProtoMessageType messageType,
@@ -105,6 +107,7 @@ namespace Google.Android.PerformanceTuner.Editor
             FileInfo protoFile,
             EnumInfoHelper enumInfoHelper)
         {
+            this.m_ProjectData = projectData;
             this.m_Config = config;
             this.m_DefaultMessage = defaultMessage;
             this.m_MessageType = messageType;
@@ -119,7 +122,7 @@ namespace Google.Android.PerformanceTuner.Editor
             CheckValidationErrors();
         }
 
-        public void OnGUI()
+        public virtual void OnGUI()
         {
             GUILayout.Space(15);
             using (var check = new EditorGUI.ChangeCheckScope())
@@ -174,7 +177,7 @@ namespace Google.Android.PerformanceTuner.Editor
         }
 
 
-        void SaveState()
+        protected void SaveState()
         {
             m_Config.SetUseAdvanced(m_EditorState.useAdvanced, m_MessageType);
             EditorUtility.SetDirty(m_Config);

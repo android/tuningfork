@@ -138,13 +138,6 @@ namespace Google.Android.PerformanceTuner
         ErrorCode CheckAnnotationMessage(SetupConfig config)
         {
             if (config.useAdvancedAnnotations) return ErrorCode.Ok;
-            if (!MessageUtil.HasLoadingState<TAnnotation>())
-            {
-                Debug.LogError("Android Performance Tuner is using default annotation, " +
-                               "but Annotation message doesn't contain loading state parameter.");
-                return ErrorCode.InvalidAnnotation;
-            }
-
             if (!MessageUtil.HasScene<TAnnotation>())
             {
                 Debug.LogError("Android Performance Tuner is using default annotation, " +
@@ -244,30 +237,14 @@ namespace Google.Android.PerformanceTuner
             QualitySettings.SetQualityLevel(qualityLevel);
         }
 
-        MessageUtil.LoadingState m_DefaultAnnotationLoadingState = MessageUtil.LoadingState.NotLoading;
-
         void OnSceneChanged(UnityEngine.SceneManagement.Scene from, UnityEngine.SceneManagement.Scene to)
         {
             var annotation = new TAnnotation();
             MessageUtil.SetScene(annotation, to.buildIndex);
-            MessageUtil.SetLoadingState(annotation, m_DefaultAnnotationLoadingState);
             var errorCode = m_AdditionalLibraryMethods.SetCurrentAnnotation(annotation);
             if (errorCode != ErrorCode.Ok)
                 Debug.LogErrorFormat("SetCurrentAnnotation({0}) result is {1}", annotation, errorCode);
         }
-
-        ErrorCode SetDefaultAnnotation(MessageUtil.LoadingState state)
-        {
-            var annotation = new TAnnotation();
-            MessageUtil.SetScene(annotation, SceneManager.GetActiveScene().buildIndex);
-            MessageUtil.SetLoadingState(annotation, state);
-            m_DefaultAnnotationLoadingState = state;
-            var errorCode = m_AdditionalLibraryMethods.SetCurrentAnnotation(annotation);
-            if (errorCode != ErrorCode.Ok)
-                Debug.LogErrorFormat("SetCurrentAnnotation({0}) result is {1}", annotation, errorCode);
-            return errorCode;
-        }
-
 
         /// <summary>
         ///     Used if swappy is not available.

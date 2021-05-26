@@ -32,6 +32,8 @@ namespace Google.Android.PerformanceTuner.Editor
         public static GUIStyle button { get; private set; }
         public static GUIStyle info { get; private set; }
         public static GUIStyle richWordWrappedLabel { get; private set; }
+        public static GUIStyle warningLabel { get; private set; }
+
 
         static bool s_Inited = false;
 
@@ -46,6 +48,7 @@ namespace Google.Android.PerformanceTuner.Editor
             button = CreateButtonStyle();
             info = CreateInfoStyle();
             richWordWrappedLabel = CreateRichWrappedLabel();
+            warningLabel = CreateWarningLabelStyle();
         }
 
         static GUIStyle CreateInfoStyle()
@@ -58,6 +61,13 @@ namespace Google.Android.PerformanceTuner.Editor
             var padding = new RectOffset(k_ButtonWidthMargin, k_ButtonWidthMargin, GUI.skin.button.padding.top,
                 GUI.skin.button.padding.bottom);
             return new GUIStyle(GUI.skin.button) {padding = padding};
+        }
+
+        static GUIStyle CreateWarningLabelStyle()
+        {
+            var style = new GUIStyle(EditorStyles.wordWrappedLabel) {richText = true};
+            style.normal.textColor = Color.red;
+            return style;
         }
 
         static GUIStyle CreateRichWrappedLabel()

@@ -31,17 +31,11 @@ namespace Google.Android.PerformanceTuner.Editor
         * Default proto:
         * syntax = "proto3";
         * option csharp_namespace = "Google.Android.PerformanceTuner";
-        * enum LoadingState {
-        *     LOADINGSTATE_INVALID = 0;
-        *     LOADINGSTATE_NOT_LOADING = 1;
-        *     LOADINGSTATE_LOADING = 2;
-        * }
         * enum Scene {
         *     SCENE_INVALID = 0;
         * }
         * message Annotation {
-        *     LoadingState loading_state = 1;
-        *     Scene scene = 2;
+        *     Scene scene = 1;
         * }
         * message FidelityParams {
         *     int32 level = 1;
@@ -49,27 +43,11 @@ namespace Google.Android.PerformanceTuner.Editor
         */
 
         public static readonly ByteString serializedDefaultProto = ByteString.FromBase64(string.Concat(
-            "ChRkZXZfdHVuaW5nZm9yay5wcm90byJJCgpBbm5vdGF0aW9uEiQKDWxvYWRp",
-            "bmdfc3RhdGUYASABKA4yDS5Mb2FkaW5nU3RhdGUSFQoFc2NlbmUYAiABKA4y",
-            "Bi5TY2VuZSIfCg5GaWRlbGl0eVBhcmFtcxINCgVsZXZlbBgBIAEoBSpgCgxM",
-            "b2FkaW5nU3RhdGUSGAoUTE9BRElOR1NUQVRFX0lOVkFMSUQQABIcChhMT0FE",
-            "SU5HU1RBVEVfTk9UX0xPQURJTkcQARIYChRMT0FESU5HU1RBVEVfTE9BRElO",
-            "RxACKksKBVNjZW5lEhEKDVNDRU5FX0lOVkFMSUQQABIvCitTQ0VORV9BU1NF",
-            "VFNfUFJJVkFURV9SVU5USU1FX1NDRU5FU19ERUZBVUxUEAFCIqoCH0dvb2ds",
-            "ZS5BbmRyb2lkLlBlcmZvcm1hbmNlVHVuZXJiBnByb3RvMw=="));
+            "ChRkZXZfdHVuaW5nZm9yay5wcm90byIjCgpBbm5vdGF0aW9uEhUKBXNjZW5l",
+            "GAEgASgOMgYuU2NlbmUiHwoORmlkZWxpdHlQYXJhbXMSDQoFbGV2ZWwYASAB",
+            "KAUqGgoFU2NlbmUSEQoNU0NFTkVfSU5WQUxJRBAAQiKqAh9Hb29nbGUuQW5k",
+            "cm9pZC5QZXJmb3JtYW5jZVR1bmVyYgZwcm90bzM="));
 
-        public static EnumInfo loadingStateEnum = new EnumInfo
-        {
-            name = Names.loadingStateEnumName,
-            values = new List<string> {"INVALID", "NOT_LOADING", "LOADING"}
-        };
-
-        static readonly FieldInfo k_LoadingStateField = new FieldInfo()
-        {
-            name = Names.loadingStateFieldName,
-            fieldType = FieldInfo.FieldType.Enum,
-            enumType = Names.loadingStateEnumName,
-        };
 
         static readonly FieldInfo k_SceneField = new FieldInfo()
         {
@@ -88,7 +66,7 @@ namespace Google.Android.PerformanceTuner.Editor
         public static readonly MessageInfo annotationMessage = new MessageInfo
         {
             name = "Annotation",
-            fields = new List<FieldInfo> {k_LoadingStateField, k_SceneField}
+            fields = new List<FieldInfo> {k_SceneField}
         };
 
 
@@ -107,9 +85,9 @@ namespace Google.Android.PerformanceTuner.Editor
 
         public static bool IsLoadingStateField(FieldDescriptor field)
         {
-            return field.Name == k_LoadingStateField.name &&
+            return field.Name == Names.loadingStateFieldName &&
                    field.FieldType == FieldType.Enum &&
-                   field.EnumType.Name == k_LoadingStateField.enumType;
+                   field.EnumType.Name == Names.loadingStateEnumName;
         }
 
         public static bool IsSceneField(FieldInfo field)
@@ -121,9 +99,9 @@ namespace Google.Android.PerformanceTuner.Editor
 
         public static bool IsLoadingStateField(FieldInfo field)
         {
-            return field.name == k_LoadingStateField.name &&
+            return field.name == Names.loadingStateFieldName &&
                    field.fieldType == FieldInfo.FieldType.Enum &&
-                   field.enumType == k_LoadingStateField.enumType;
+                   field.enumType == Names.loadingStateEnumName;
         }
     }
 }

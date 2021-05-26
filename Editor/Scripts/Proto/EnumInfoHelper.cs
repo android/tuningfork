@@ -32,7 +32,7 @@ namespace Google.Android.PerformanceTuner.Editor.Proto
     /// </summary>
     public class EnumInfoHelper
     {
-        public static readonly string[] reservedEnumNames = {Names.sceneEnumName, Names.loadingStateEnumName};
+        public static readonly string[] reservedEnumNames = {Names.sceneEnumName};
 
         readonly IList<EnumDescriptor> m_EnumTypes;
 

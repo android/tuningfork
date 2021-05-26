@@ -90,6 +90,7 @@ namespace Google.Android.PerformanceTuner.Editor
             }
 
             UpdateFidelityMessages();
+            CheckForLoadingStateInAnnotation();
 
             // TODO(kseniia): Check for possible inconsistencies in the data, set to false if any found
             // TODO(kseniia): or remove "valid" if all problems could be fixed in-place
@@ -100,6 +101,14 @@ namespace Google.Android.PerformanceTuner.Editor
         public static void RefreshAssetsCompleted()
         {
             Debug.Log("Android Performance Tuner RefreshAssetsCompleted");
+        }
+
+        static void CheckForLoadingStateInAnnotation()
+        {
+            if (projectData.hasLoadingState)
+            {
+                Debug.LogError(Names.fixDefaultAnnotationConsoleMessage);
+            }
         }
 
         static DevDescriptor CreateDescriptor()
@@ -129,9 +138,8 @@ namespace Google.Android.PerformanceTuner.Editor
         {
             var protoFile = new Proto.FileInfo(devDescriptor.fileDescriptor);
 
-            // Always add scene and loading state enum.
+            // Always add scene.
             protoFile.AddEnum(EnumInfoHelper.GetSceneEnum(EditorBuildSettings.scenes));
-            protoFile.AddEnum(DefaultMessages.loadingStateEnum);
 
             protoFile.onUpdate += () =>
             {

@@ -63,6 +63,7 @@ namespace Google.Android.PerformanceTuner.Editor
 
         SettingsEditor m_SettingsEditor;
         FidelityParametersEditor m_FidelityParametersEditor;
+        IntegrationStepsEditor m_IntegrationStepsEditor;
         AnnotationMessageEditor m_AnnotationMessageEditor;
         FidelityMessageEditor m_FidelityMessageEditor;
         InstrumentationSettingsEditor m_InstrumentationSettingsEditor;
@@ -79,10 +80,11 @@ namespace Google.Android.PerformanceTuner.Editor
             m_SetupConfig = FileUtil.LoadSetupConfig();
 
             m_SettingsEditor = new SettingsEditor(Initializer.projectData, m_SetupConfig);
+            m_IntegrationStepsEditor = new IntegrationStepsEditor(Initializer.projectData, m_SetupConfig);
             m_FidelityParametersEditor =
                 new FidelityParametersEditor(Initializer.projectData, Initializer.devDescriptor);
-            m_AnnotationMessageEditor = new AnnotationMessageEditor(m_SetupConfig, Initializer.protoFile,
-                Initializer.devDescriptor.annotationMessage, Initializer.enumInfoHelper);
+            m_AnnotationMessageEditor = new AnnotationMessageEditor(Initializer.projectData, m_SetupConfig,
+                Initializer.protoFile, Initializer.devDescriptor.annotationMessage, Initializer.enumInfoHelper);
             m_FidelityMessageEditor = new FidelityMessageEditor(Initializer.projectData, m_SetupConfig,
                 Initializer.protoFile,
                 Initializer.devDescriptor.fidelityMessage, Initializer.enumInfoHelper);
@@ -90,17 +92,21 @@ namespace Google.Android.PerformanceTuner.Editor
                 new InstrumentationSettingsEditor(Initializer.projectData);
         }
 
-        readonly string[] m_ToolbarOptions = new string[5]
+        const int MenuSize = 6;
+
+        readonly string[] m_ToolbarOptions = new string[MenuSize]
         {
             "Settings",
+            "Integration Checklist",
             "Annotation parameters",
             "Fidelity parameters",
             "Quality levels",
             "Instrumentation Settings"
         };
 
-        readonly string[] m_Tooltips = new string[5]
+        readonly string[] m_Tooltips = new string[MenuSize]
         {
+            null,
             null,
             null,
             null,
@@ -108,7 +114,7 @@ namespace Google.Android.PerformanceTuner.Editor
             null
         };
 
-        readonly bool[] m_ToolbarEnabled = new bool[5] {true, true, true, true, true};
+        readonly bool[] m_ToolbarEnabled = new bool[MenuSize] {true, true, true, true, true, true};
         int m_ToolbarSelected = 0;
 
         //TODO(b/120588304) Check if that color is ok.
@@ -131,7 +137,7 @@ namespace Google.Android.PerformanceTuner.Editor
                 return;
             }
 
-            m_ToolbarEnabled[3] = m_SetupConfig.useAdvancedFidelityParameters;
+            m_ToolbarEnabled[4] = m_SetupConfig.useAdvancedFidelityParameters;
             DrawMenu();
             using (new GUILayout.HorizontalScope())
             {
@@ -148,15 +154,18 @@ namespace Google.Android.PerformanceTuner.Editor
                             m_SettingsEditor.OnGUI();
                             break;
                         case 1:
-                            m_AnnotationMessageEditor.OnGUI();
+                            m_IntegrationStepsEditor.OnGUI();
                             break;
                         case 2:
-                            m_FidelityMessageEditor.OnGUI();
+                            m_AnnotationMessageEditor.OnGUI();
                             break;
                         case 3:
-                            m_FidelityParametersEditor.OnGUI();
+                            m_FidelityMessageEditor.OnGUI();
                             break;
                         case 4:
+                            m_FidelityParametersEditor.OnGUI();
+                            break;
+                        case 5:
                             m_InstrumentationSettingsEditor.OnGUI();
                             break;
                     }

@@ -145,30 +145,13 @@ namespace Google.Android.PerformanceTuner
         }
 
         /// <summary>
-        ///     Set loading state.
-        ///     Use only for default annotation.
-        ///     Set <see cref="MessageUtil.LoadingState.Loading"/> when loading is started.
-        ///     <br/><b>Important:</b>
-        ///     <list type="bullet">
-        ///         <item> Don't forget to set <see cref="MessageUtil.LoadingState.NotLoading"/> when loading is finished. </item>
-        ///         <item> Frame information will not be recorded during loading. </item>
-        ///     </list>
+        /// Obsolete - Use <see cref="StartRecordingLoadingTime"/> and <see cref="StopRecordingLoadingTime"/> instead.
         /// </summary>
-        /// <param name="state">loading state</param>
-        /// <returns>
-        ///     <see cref="ErrorCode.TuningforkNotInitialized"/> if plugin is not initialized.
-        ///     <see cref="ErrorCode.InvalidMode"/> if using with custom annotation mode.
-        ///     <see cref="ErrorCode.Ok"/> on success.
-        /// </returns>
+        [Obsolete]
         public ErrorCode SetLoadingState(MessageUtil.LoadingState state)
         {
-            if (m_SetupConfig == null) return ErrorCode.TuningforkNotInitialized;
-
-            if (!m_SetupConfig.useAdvancedAnnotations)
-                return SetDefaultAnnotation(state);
-
-            Debug.LogWarning("Android Performance Tuner: " +
-                             "Don't set loading state when custom annotation enabled");
+            Debug.LogWarning("LoadingState is deprecated, you should use \"StartRecordingLoadingTime\" " +
+                             "and \"StopRecordingLoadingTime\" instead");
             return ErrorCode.InvalidMode;
         }
 

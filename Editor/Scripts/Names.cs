@@ -30,5 +30,23 @@ namespace Google.Android.PerformanceTuner.Editor
         public const string loadingStateEnumName = "LoadingState";
         public const string sceneFieldName = "scene";
         public const string loadingStateFieldName = "loading_state";
+
+        public const string removeLoadingStateTooltip =
+            "This parameter is obsolete. You should remove it from annotation and use \"StartRecordingLoadingTime\" " +
+            "and \"StopRecordingLoadingTime\" instead.";
+
+        public const string fixDefaultAnnotationMessage =
+            "Loading state field in Annotation is deprecated." +
+            "You should not use it any longer. \n" +
+            "Use \"StartRecordingLoadingTime\" and \"StopRecordingLoadingTime\" instead. \n" +
+            "Press \"Fix\" to remove loading state from default annotation. \n" +
+            "Important: please remove any references to LoadingState from your project, you might get a compilier error " +
+            "\" CS0117: 'Annotation' does not contain a definition for 'LoadingState'\" otherwise.";
+
+        public const string fixDefaultAnnotationConsoleMessage =
+            "Loading state field in Annotation is deprecated." +
+            "You should not use it any longer. " +
+            "Use \"StartRecordingLoadingTime\" and \"StopRecordingLoadingTime\" instead. " +
+            "Go to \"Android Performance Tuner -> Setup -> Annotation parameters\" to fix it";
     }
 }

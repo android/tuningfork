@@ -31,6 +31,7 @@ namespace Google.Android.PerformanceTuner
     /// </summary>
     public static class MessageUtil
     {
+        [Obsolete]
         public enum LoadingState
         {
             NotLoading = 1,
@@ -98,23 +99,6 @@ namespace Google.Android.PerformanceTuner
                 new object[] {qualityLevel});
         }
 
-
-        /// <summary>
-        ///     Set loading state for LoadingState field via reflection.
-        /// </summary>
-        /// <param name="message">The message to update</param>
-        /// <param name="loading">The loading state to set. false for Not Loading, true for Loading.</param>
-        public static void SetLoadingState(IMessage message, LoadingState state)
-        {
-            var levelEnumType = message.GetType().GetProperty(k_LoadingStateField).PropertyType;
-
-            message.GetType().InvokeMember(
-                k_LoadingStateField,
-                BindingFlags.SetProperty,
-                Type.DefaultBinder,
-                message,
-                new object[1] {Enum.ToObject(levelEnumType, (int) state)});
-        }
 
         public static bool HasLoadingState<TAnnotation>()
             where TAnnotation : class, IMessage<TAnnotation>, new()

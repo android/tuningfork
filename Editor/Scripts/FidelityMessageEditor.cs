@@ -28,8 +28,6 @@ namespace Google.Android.PerformanceTuner.Editor
 {
     public class FidelityMessageEditor : MessageEditor
     {
-        ProjectData m_ProjectData;
-
         const string k_BasicInfo =
             "       Unity quality levels are used as Android Performance Tuner quality levels.\n" +
             "       Unity quality settings are updated automatically when they're updated from the server.";
@@ -49,6 +47,7 @@ namespace Google.Android.PerformanceTuner.Editor
         public FidelityMessageEditor(ProjectData projectData, SetupConfig config, FileInfo protoFile,
             MessageDescriptor descriptor,
             EnumInfoHelper enumInfoHelper) : base(
+            projectData,
             config,
             descriptor,
             ProtoMessageType.FidelityParams,
@@ -56,7 +55,6 @@ namespace Google.Android.PerformanceTuner.Editor
             protoFile,
             enumInfoHelper)
         {
-            m_ProjectData = projectData;
         }
 
         protected override FieldInfo RenderInfo(FieldInfo info, Rect rect, int index)
