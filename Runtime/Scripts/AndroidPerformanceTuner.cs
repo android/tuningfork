@@ -306,5 +306,23 @@ namespace Google.Android.PerformanceTuner
         {
             return AddUploadCallback();
         }
+
+        /// <summary>
+        ///     Sets the interval between histogram uploads, overriding
+        ///     the currently saved one.
+        /// </summary>
+        /// <param name="method">Whether to use a time-based or tick-based strategy.</param>
+        /// <param name="intervalMsOrCount">Millisecond or count-based interval.</param>
+        /// <returns>
+        ///     <see cref="ErrorCode.Ok"/> on success.
+        ///     <see cref="ErrorCode.TuningforkNotInitialized"/> if Tuning
+        ///     Fork wasn't initialised.
+        ///     <see cref="ErrorCode.BadParameter"/> if method is not <see cref="Submission.TimeBased"/> or
+        ///     <see cref="Submission.TickBased"/>, or if intervalMsOrCount is 0 or greater than one day.
+        /// </returns>
+        public ErrorCode SetAggregationStrategyInterval(Submission method, UInt32 intervalMsOrCount)
+        {
+            return m_Library.SetAggregationStrategyInterval(method, intervalMsOrCount);
+        }
     }
 }

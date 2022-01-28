@@ -62,14 +62,24 @@ namespace Google.Android.PerformanceTuner.Editor
 
             devDescriptor = CreateDescriptor();
 
+            // When a new package is imported in Unity 2018, EditorBuildSettings.scenes are not updated yet when
+            // Initializer() is called, thus the .proto file does not reflect possible changes in the scenes.
+            // This callback creates the .proto file when the package has finished importing and the
+            // EditorBuildSettings are up to date.
+#if UNITY_2018
+            AssetDatabase.importPackageCompleted += (packageName) =>
+            {
+                CreateProtoFile(devDescriptor);
+            };
+#endif
+
+            enumInfoHelper = new EnumInfoHelper(devDescriptor.fileDescriptor);
             protoFile = CreateProtoFile(devDescriptor);
 
             CreateAsmdefFile();
 
             projectData = new ProjectData();
             projectData.LoadFromStreamingAssets(devDescriptor);
-
-            enumInfoHelper = new EnumInfoHelper(devDescriptor.fileDescriptor);
 
             EditorBuildSettings.sceneListChanged += () =>
             {
@@ -163,7 +173,8 @@ namespace Google.Android.PerformanceTuner.Editor
             // If files do not exist yet, call OnUpdate to generate them (.proto, .descriptor and .cs).
             if (!File.Exists(Paths.devProtoPath) ||
                 !File.Exists(Paths.devDescriptorPath) ||
-                !FidelityBuilder.builder.valid)
+                !FidelityBuilder.builder.valid ||
+                HasSceneEnumChanged())
             {
                 protoFile.onUpdate();
             }
@@ -192,13 +203,20 @@ namespace Google.Android.PerformanceTuner.Editor
         /// </summary>
         static void UpdateSceneEnum()
         {
-            var allEnums = enumInfoHelper.CreateInfoList();
-            var newSceneEnum = EnumInfoHelper.GetSceneEnum(EditorBuildSettings.scenes);
-            var prevSceneEnum = allEnums.Find(x => x.name == Names.sceneEnumName);
+            if (HasSceneEnumChanged())
+            {
+                Debug.Log("Android Performance Tuner: Scenes enum is updated");
+                var newSceneEnum = EnumInfoHelper.GetSceneEnum(EditorBuildSettings.scenes);
+                protoFile.AddEnum(newSceneEnum);
+            }
+        }
 
-            if (newSceneEnum.values == prevSceneEnum.values) return;
-            Debug.Log("Android Performance Tuner: Scenes enum is updated");
-            protoFile.AddEnum(newSceneEnum);
+        static bool HasSceneEnumChanged()
+        {
+            var newSceneEnum = EnumInfoHelper.GetSceneEnum(EditorBuildSettings.scenes);
+            var allEnums = enumInfoHelper.CreateInfoList();
+            var prevSceneEnum = allEnums.Find(x => x.name == Names.sceneEnumName);
+            return newSceneEnum.values != prevSceneEnum.values;
         }
 
         static void UpdateFidelityMessages()

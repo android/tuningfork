@@ -133,6 +133,11 @@ namespace Google.Android.PerformanceTuner
         {
             return ErrorCode.PlatformNotSupported;
         }
+
+        public ErrorCode SetAggregationStrategyInterval(Submission method, uint intervalMsOrCount)
+        {
+            return ErrorCode.PlatformNotSupported;
+        }
     }
 }
 #endif

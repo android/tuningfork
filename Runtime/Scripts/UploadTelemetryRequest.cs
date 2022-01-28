@@ -489,6 +489,38 @@ namespace Google.Android.PerformanceTuner
             ///     Distribution of memory usage
             /// </summary>
             public List<MemoryHistogram> memory_histogram;
+            /// <summary>
+            ///     Memory usage reported as timed events. Upper limit for the size
+            ///     of this array is 120 events. Results exceeding this limit will be
+            ///     truncated.
+            /// </summary>
+            public List<MemoryEvent> memory_event;
+        }
+
+        /// <summary>
+        ///     An event describing current memory state of the device.
+        /// </summary>
+        [Serializable]
+        public class MemoryEvent
+        {
+            /// <summary>
+            ///     Duration from process start to the time the event is collected.
+            /// </summary>
+            public string event_time;
+            /// <summary>
+            ///     The memory used by the app, in bytes, except the shared memory
+            ///     is proportionally calculated. Read from android.os.Debug#getPss
+            /// </summary>
+            public string proportional_set_size;
+            /// <summary>
+            ///     The available memory on the device, in bytes, read from
+            ///     ActivityManager#MemoryInfo
+            /// </summary>
+            public string avail_mem;
+            /// <summary>
+            ///     OOM score of the app, read from /proc/<pid>/oom_score
+            /// </summary>
+            public string oom_score;
         }
 
         /// <summary>

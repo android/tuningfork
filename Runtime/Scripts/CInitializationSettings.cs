@@ -79,5 +79,11 @@ namespace Google.Android.PerformanceTuner
         ///     further requested metrics will not be added and data will be lost.
         /// </summary>
         public MetricLimits max_num_metrics;
+
+        /// <summary>
+        ///     If non-null, this value overrides the api_key field in the app's
+        ///     tuningfork_settings.bin file. See tuningfork.proto for more information.
+        /// </summary>
+        public IntPtr api_key;
     }
 }

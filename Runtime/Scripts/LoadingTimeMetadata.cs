@@ -136,5 +136,19 @@ namespace Google.Android.PerformanceTuner
         ///     Latency in nanoseconds.
         /// </summary>
         public ulong network_latency_ns;
+
+        public static LoadingTimeMetadata Copy(LoadingTimeMetadata toBeCopied)
+        {
+            LoadingTimeMetadata newMetadata = new LoadingTimeMetadata()
+            {
+                state = toBeCopied.state,
+                source = toBeCopied.source,
+                compression_level = toBeCopied.compression_level,
+                network_connectivity = toBeCopied.network_connectivity,
+                network_transfer_speed_bps = toBeCopied.network_transfer_speed_bps,
+                network_latency_ns = toBeCopied.network_latency_ns
+            };
+            return newMetadata;
+        }
     }
 }

@@ -217,6 +217,14 @@ namespace Google.Android.PerformanceTuner
         {
             return (ErrorCode) TuningFork_stopLoadingGroup(handle);
         }
+
+        [DllImport(PerformanceTuner)]
+        static extern int TuningFork_setAggregationStrategyInterval(Submission method, UInt32 intervalMsOrCount);
+
+        public ErrorCode SetAggregationStrategyInterval(Submission method, uint intervalMsOrCount)
+        {
+            return (ErrorCode) TuningFork_setAggregationStrategyInterval(method, intervalMsOrCount);
+        }
     }
 }
 #endif

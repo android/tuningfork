@@ -85,5 +85,7 @@ namespace Google.Android.PerformanceTuner
             ref ulong handle);
 
         ErrorCode StopLoadingGroup(ulong handle);
+
+        ErrorCode SetAggregationStrategyInterval(Submission method, UInt32 intervalMsOrCount);
     }
 }
