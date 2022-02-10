@@ -147,14 +147,28 @@ namespace Google.Android.PerformanceTuner.Editor
         public static readonly string devFidelityFilePrefix = "dev_tuningfork_fidelityparams_";
 
         /// <summary>
-        ///     Path to SetupConfig.asset file
+        ///     SetupConfig filename.
+        /// </summary>
+        public static readonly string configFileName = "SetupConfig";
+
+        /// <summary>
+        ///     Path to SetupConfig.asset file.
         /// </summary>
         public static readonly string configPath = Path.Combine(
             "Assets",
             "AndroidPerformanceTuner_gen",
             "Runtime",
             "Resources",
-            "SetupConfig.asset");
+            configFileName + ".asset");
+
+        /// <summary>
+        ///     Path to SetupConfig.asset folder.
+        /// </summary>
+        public static readonly string configFolderPath = Path.Combine(
+            "Assets",
+            "AndroidPerformanceTuner_gen",
+            "Runtime",
+            "Resources");
 
         /// <summary>
         ///     Path to root folder with protoc binaries.

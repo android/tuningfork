@@ -113,12 +113,16 @@ namespace Google.Android.PerformanceTuner.Editor
             this.m_MessageType = messageType;
             this.m_Descriptor = descriptor;
             this.m_EnumInfoHelper = enumInfoHelper;
-            this.m_EditorStatePrefs = new EditorStatePrefs<EditorState>(messageType.ToString(),
-                new EditorState(m_Config.GetUseAdvanced(m_MessageType), defaultMessage));
-            this.m_EditorState = m_EditorStatePrefs.Get();
-            this.m_ProtoFile = protoFile;
             this.m_SavedEditorState =
                 new EditorState(m_Config.GetUseAdvanced(m_MessageType), new MessageInfo(m_Descriptor));
+            // If using advanced mode, use the saved editor state which has user-inserted fields to prevent
+            // inconsistencies.
+            EditorState defaultEditorState = m_Config.GetUseAdvanced(m_MessageType)
+                ? m_SavedEditorState
+                : new EditorState(m_Config.GetUseAdvanced(m_MessageType), defaultMessage);
+            this.m_EditorStatePrefs = new EditorStatePrefs<EditorState>(messageType.ToString(), defaultEditorState);
+            this.m_EditorState = m_EditorStatePrefs.Get();
+            this.m_ProtoFile = protoFile;
             CheckValidationErrors();
         }
 

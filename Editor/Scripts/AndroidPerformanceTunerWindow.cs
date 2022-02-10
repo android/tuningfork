@@ -79,17 +79,17 @@ namespace Google.Android.PerformanceTuner.Editor
 
             m_SetupConfig = FileUtil.LoadSetupConfig();
 
-            m_SettingsEditor = new SettingsEditor(Initializer.projectData, m_SetupConfig);
-            m_IntegrationStepsEditor = new IntegrationStepsEditor(Initializer.projectData, m_SetupConfig);
+            m_SettingsEditor = new SettingsEditor(Initializer.ProjectData, m_SetupConfig);
+            m_IntegrationStepsEditor = new IntegrationStepsEditor(Initializer.ProjectData, m_SetupConfig);
             m_FidelityParametersEditor =
-                new FidelityParametersEditor(Initializer.projectData, Initializer.devDescriptor);
-            m_AnnotationMessageEditor = new AnnotationMessageEditor(Initializer.projectData, m_SetupConfig,
-                Initializer.protoFile, Initializer.devDescriptor.annotationMessage, Initializer.enumInfoHelper);
-            m_FidelityMessageEditor = new FidelityMessageEditor(Initializer.projectData, m_SetupConfig,
-                Initializer.protoFile,
-                Initializer.devDescriptor.fidelityMessage, Initializer.enumInfoHelper);
+                new FidelityParametersEditor(Initializer.ProjectData, Initializer.DevDescriptor);
+            m_AnnotationMessageEditor = new AnnotationMessageEditor(Initializer.ProjectData, m_SetupConfig,
+                Initializer.ProtoFile, Initializer.DevDescriptor.annotationMessage, Initializer.EnumInfoHelper);
+            m_FidelityMessageEditor = new FidelityMessageEditor(Initializer.ProjectData, m_SetupConfig,
+                Initializer.ProtoFile,
+                Initializer.DevDescriptor.fidelityMessage, Initializer.EnumInfoHelper);
             m_InstrumentationSettingsEditor =
-                new InstrumentationSettingsEditor(Initializer.projectData);
+                new InstrumentationSettingsEditor(Initializer.ProjectData, m_SetupConfig);
         }
 
         const int MenuSize = 6;

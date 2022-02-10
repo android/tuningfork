@@ -34,6 +34,7 @@ namespace Google.Android.PerformanceTuner.Editor
         readonly ProjectData m_ProjectData;
         readonly EditorState m_EditorState;
         readonly String m_DefaultSettingsUiString;
+        private readonly SetupConfig m_SetupConfig;
 
         const string k_DefaultInfo =
             "       Use advanced settings only if you've found the default ones are not working for you.";
@@ -41,18 +42,20 @@ namespace Google.Android.PerformanceTuner.Editor
         Settings m_AdvancedSettings;
         ReorderableList m_HistogramList;
 
-        public InstrumentationSettingsEditor(ProjectData projectData)
+        public InstrumentationSettingsEditor(ProjectData projectData, SetupConfig setupConfig)
         {
+            m_ProjectData = projectData;
+            m_SetupConfig = setupConfig;
+            LoadFromCachedEditorStateOrData();
+
             m_EditorStatePrefs =
                 new EditorStatePrefs<EditorState>("instrumentation-settings", new EditorState()
                 {
-                    useAdvanced = false,
-                    jsonSettings = SettingsUtil.defaultSettings.ToString()
+                    useAdvanced = m_SetupConfig.useAdvancedInstrumentationSettings,
+                    jsonSettings = m_AdvancedSettings.ToString()
                 });
-            m_ProjectData = projectData;
             m_EditorState = m_EditorStatePrefs.Get();
             m_DefaultSettingsUiString = ToUiString(SettingsUtil.defaultSettings);
-            LoadFromCachedEditorStateOrData();
         }
 
 
@@ -82,9 +85,8 @@ namespace Google.Android.PerformanceTuner.Editor
                     {
                         m_ProjectData.ResetSettingsToDefault();
                     }
-
-
                     CacheSettings();
+                    SaveConfigState(m_EditorState.useAdvanced);
                 }
             }
 
@@ -110,10 +112,17 @@ namespace Google.Android.PerformanceTuner.Editor
                 {
                     m_AdvancedSettings = m_ProjectData.ResetSettingsToDefault();
                     CacheSettings();
+                    SaveConfigState(false);
                 }
             }
 
             GUILayout.Space(10);
+        }
+
+        private void SaveConfigState(bool useAdvanced)
+        {
+            m_SetupConfig.SetUseAdvanceInstrumentationSettings(useAdvanced);
+            EditorUtility.SetDirty(m_SetupConfig);
         }
 
 

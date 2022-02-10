@@ -46,6 +46,11 @@ namespace Google.Android.PerformanceTuner
         [FormerlySerializedAs("UseAdvancedAnnotations")]
         public bool useAdvancedAnnotations;
 
+        /// <summary>
+        /// Use default or custom instrumentation settings.
+        /// </summary>
+        public bool useAdvancedInstrumentationSettings;
+
         public TunerMode mode = TunerMode.Insights;
 
         public bool GetUseAdvanced(ProtoMessageType type)
@@ -56,6 +61,11 @@ namespace Google.Android.PerformanceTuner
                 case ProtoMessageType.FidelityParams: return useAdvancedFidelityParameters;
                 default: throw new System.ArgumentException("Unknown message type");
             }
+        }
+
+        public void SetUseAdvanceInstrumentationSettings(bool useAdvanced)
+        {
+            useAdvancedInstrumentationSettings = useAdvanced;
         }
 
         public void SetUseAdvanced(bool useAdvanced, ProtoMessageType type)

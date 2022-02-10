@@ -664,7 +664,13 @@ namespace Google.Android.PerformanceTuner
                 // Unspecified.
                 CRASH_REASON_UNSPECIFIED = 0,
 
-                LOW_MEMORY = 1
+                LOW_MEMORY = 1,
+
+                SEGMENTATION_FAULT = 2,
+
+                BUS_ERROR = 3,
+
+                FLOATING_POINT_ERROR = 4
             }
 
             /// <summary>

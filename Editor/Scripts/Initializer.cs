@@ -19,24 +19,30 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Google.Protobuf;
 using UnityEngine;
 using System.IO;
 using UnityEditor;
 using Google.Android.PerformanceTuner.Editor.Proto;
+using FileInfo = Google.Android.PerformanceTuner.Editor.Proto.FileInfo;
 
 namespace Google.Android.PerformanceTuner.Editor
 {
     /// <summary>
     ///     Initializing plugin data and callbacks.
     /// </summary>
-    public class Initializer
+    public class Initializer : AssetPostprocessor
     {
-        public static readonly Proto.FileInfo protoFile;
-        public static readonly DevDescriptor devDescriptor;
-        public static readonly ProjectData projectData;
-        public static readonly EnumInfoHelper enumInfoHelper;
-        public static readonly SetupConfig setupConfig;
+        private static Proto.FileInfo protoFile;
+        private static DevDescriptor devDescriptor;
+        private static ProjectData projectData;
+        private static EnumInfoHelper enumInfoHelper;
+        private static SetupConfig setupConfig;
+        
+        public static FileInfo ProtoFile => protoFile;
+        public static DevDescriptor DevDescriptor => devDescriptor;
+        public static ProjectData ProjectData => projectData;
+        public static EnumInfoHelper EnumInfoHelper => enumInfoHelper;
+        public static SetupConfig SetupConfig => setupConfig;
 
         static bool s_Valid;
 
@@ -54,12 +60,59 @@ namespace Google.Android.PerformanceTuner.Editor
             private set { s_InitMessage = value; }
         }
 
+        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets,
+            string[] movedFromAssetPaths)
+        {
+            foreach (string str in importedAssets)
+            {
+                // We are interested in knowing when the SetupConfig has been re-imported so that it can correctly be
+                // loaded and used by the Init function.
+                if (str.Equals(Paths.configPath))
+                {
+                    Init();
+                    break;
+                }
+            }
+        }
+
         static Initializer()
+        {
+            // When reimporting a project, scripts might be imported before other types of assets are. This covers the
+            // case in which the SetupConfig is present in the project but has not yet been imported by the
+            // AssetDatabase. In this case, return and wait for the OnPostProcessAllAssets to call the Init function
+            // after importing SetupConfig.
+#if UNITY_2017 || UNITY_2018
+            var guid = AssetDatabase.AssetPathToGUID(Paths.configPath);
+            if(!guid.Equals("") && AssetDatabase.LoadAssetAtPath<SetupConfig>(Paths.configPath) == null)
+#else
+            int setupConfigFilesFound = AssetDatabase
+                .FindAssets(Paths.configFileName, new string[] {Paths.configFolderPath}).Length;
+            if ( setupConfigFilesFound > 0
+                 && AssetDatabase.LoadAssetAtPath<SetupConfig>(Paths.configPath) == null)
+#endif
+            {
+                return;
+            }
+            // If there's no SetupConfig file, create one and let Init be called by OnPostProcessAllAssets.
+#if UNITY_2017 || UNITY_2018
+            if(guid.Equals(""))
+#else
+            if (setupConfigFilesFound == 0)
+#endif
+            {
+                setupConfig = FileUtil.CreateSetupConfig();
+                return;
+            }
+
+            // In all the other cases, proceed to Init.
+            Init();
+        }
+
+        static void Init()
         {
             Debug.Log("Android Performance Tuner Initializer");
 
             setupConfig = FileUtil.LoadSetupConfig();
-
             devDescriptor = CreateDescriptor();
 
             // When a new package is imported in Unity 2018, EditorBuildSettings.scenes are not updated yet when

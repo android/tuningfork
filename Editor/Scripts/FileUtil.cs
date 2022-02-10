@@ -44,11 +44,19 @@ namespace Google.Android.PerformanceTuner.Editor
         public static SetupConfig LoadSetupConfig()
         {
             SetupConfig config = AssetDatabase.LoadAssetAtPath<SetupConfig>(Paths.configPath);
-            if (config != null) return config;
+            return config != null ? config : CreateSetupConfig();
+
+        }
+
+        /// <summary>
+        ///     Create the setup config asset for the project.
+        /// </summary>
+        /// <returns>Created SetupConfig.asset.</returns>
+        public static SetupConfig CreateSetupConfig()
+        {
             Directory.CreateDirectory(Path.GetDirectoryName(Paths.configPath));
-            config = ScriptableObject.CreateInstance<SetupConfig>();
+            SetupConfig config = ScriptableObject.CreateInstance<SetupConfig>();
             AssetDatabase.CreateAsset(config, Paths.configPath);
-            Debug.LogFormat("New asset created at path {0}", Paths.configPath);
             return config;
         }
 
