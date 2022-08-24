@@ -47,7 +47,21 @@ namespace Google.Android.PerformanceTuner.Editor
             GUILayout.Space(10);
             GUILayout.Label(k_InfoText, Styles.info);
             GUILayout.Space(10);
+
+            // Change labelWidth to make Toggle label fit.
+            float originalValue = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = 230;
             m_ProjectData.apiKey = EditorGUILayout.TextField("API key", m_ProjectData.apiKey);
+            using (var group = new EditorGUI.ChangeCheckScope())
+            {
+                m_SetupConfig.verboseLoggingEnabled = EditorGUILayout.Toggle("Underlying libs verbose logging enabled",
+                    m_SetupConfig.verboseLoggingEnabled);
+                m_SetupConfig.pluginVerboseLoggingEnabled = EditorGUILayout.Toggle("Plugin verbose logging enabled",
+                    m_SetupConfig.pluginVerboseLoggingEnabled);
+
+                if (group.changed) EditorUtility.SetDirty(m_SetupConfig);
+            }
+            EditorGUIUtility.labelWidth = originalValue;
         }
 
         StatusContent m_PluginStatus;

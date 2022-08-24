@@ -20,6 +20,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using AOT;
 using Google.Protobuf;
 using UnityEngine;
@@ -44,6 +45,7 @@ namespace Google.Android.PerformanceTuner
         string m_endPoint = null;
         MetricLimits m_MetricLimits;
         const string k_LocalEndPoint = "http://localhost:9000";
+        Dictionary<string, int> addressablesScenes;
 
         // For callbacks only.
         static AndroidPerformanceTuner<TFidelity, TAnnotation> s_Tuner;
@@ -100,6 +102,7 @@ namespace Google.Android.PerformanceTuner
                 settings.fidelityParamsCallback = Callbacks.FidelityParamsCallbackImpl;
             settings.maxNumMetrics = m_MetricLimits;
 
+            settings.verbose_logging_enabled = m_SetupConfig.verboseLoggingEnabled;
 
             var errorCode = m_AdditionalLibraryMethods.InitWithSettings(settings);
 
@@ -118,6 +121,8 @@ namespace Google.Android.PerformanceTuner
             if (!m_SetupConfig.useAdvancedAnnotations) EnableDefaultAnnotationsMode();
             if (!m_SetupConfig.useAdvancedFidelityParameters) EnableDefaultFidelityMode();
 
+            SetupAddressables();
+
             AddAutoFlush();
             AddAutoLifecycleUpdate();
             CheckNetworkReachability();
@@ -132,7 +137,10 @@ namespace Google.Android.PerformanceTuner
         void CheckNetworkReachability()
         {
             var internetReachability = Application.internetReachability;
-            Debug.LogFormat("internet reachability is {0}", internetReachability);
+            if (m_SetupConfig.pluginVerboseLoggingEnabled)
+            {
+                Debug.LogFormat("Internet reachability is {0}", internetReachability);
+            }
         }
 
         ErrorCode CheckAnnotationMessage(SetupConfig config)
@@ -183,7 +191,10 @@ namespace Google.Android.PerformanceTuner
             m_SceneObject.onAppInBackground += () =>
             {
                 ErrorCode code = m_Library.Flush();
-                Debug.LogFormat("Flush in background {0}", code);
+                if (m_SetupConfig.pluginVerboseLoggingEnabled)
+                {
+                    Debug.LogFormat("Flush in background {0}", code);
+                }
             };
         }
 
@@ -195,7 +206,7 @@ namespace Google.Android.PerformanceTuner
             {
                 ErrorCode code = m_Library.ReportLifecycleEvent(state);
                 if (code != ErrorCode.Ok)
-                    Debug.LogFormat("ReportLifecycleEvent({0}) errorCode is {1}", state, code);
+                    Debug.LogErrorFormat("ReportLifecycleEvent({0}) errorCode is {1}", state, code);
             };
             m_OnStop += () => { m_Library.ReportLifecycleEvent(LifecycleState.OnDestroy); };
         }
@@ -240,7 +251,17 @@ namespace Google.Android.PerformanceTuner
         void OnSceneChanged(UnityEngine.SceneManagement.Scene from, UnityEngine.SceneManagement.Scene to)
         {
             var annotation = new TAnnotation();
-            MessageUtil.SetScene(annotation, to.buildIndex);
+            int sceneIndex = -1;
+            if(to.buildIndex >= 0){
+                sceneIndex = to.buildIndex;
+            }
+#if APT_ADDRESSABLE_PACKAGE_PRESENT
+            else
+            {
+                sceneIndex = ConvertAddressableScenePathToAPTSceneIndex(to.path);
+            }
+#endif
+            MessageUtil.SetScene(annotation, sceneIndex);
             var errorCode = m_AdditionalLibraryMethods.SetCurrentAnnotation(annotation);
             if (errorCode != ErrorCode.Ok)
                 Debug.LogErrorFormat("SetCurrentAnnotation({0}) result is {1}", annotation, errorCode);
@@ -274,6 +295,19 @@ namespace Google.Android.PerformanceTuner
                         Debug.LogErrorFormat("SetFidelityParameters({0}) result is {1}", message, errorCode);
                 }
             }
+        }
+
+        // Setup addressables scenes dictionary for lookup of protobuf scenes entry at runtime.
+        void SetupAddressables(){
+#if APT_ADDRESSABLE_PACKAGE_PRESENT
+            if(!m_SetupConfig.AreAddressablesScenesPresent()) return;
+
+            addressablesScenes = new Dictionary<string, int>();
+            List<AddressablesScenesEnumInfo> savedAddrScenes = m_SetupConfig.AddressablesScenes;
+            for(int i = 0; i < savedAddrScenes.Count; i++){
+                addressablesScenes.Add(savedAddrScenes[i].protoEnumSceneName, savedAddrScenes[i].value);
+            }
+#endif
         }
 
         TFidelity m_ReceivedFidelityParameters = null;

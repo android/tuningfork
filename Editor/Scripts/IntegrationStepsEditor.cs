@@ -74,13 +74,22 @@ namespace Google.Android.PerformanceTuner.Editor
 
         readonly GUIContent contentLoading = new GUIContent("6) Record when your game is performing loading events");
 
+        readonly GUIContent contentAddressablesAvailable =
+            new GUIContent(
+                "7) If using the Addressables package, update the Addressables scenes from the Addressables Settings tab " +
+                "in this window");
+
+        private readonly GUIContent contentAddressablesNotAvailable =
+            new GUIContent("7) To use Addressables, make sure you're using Unity 2019.3 or newer and have the Addressables " +
+                           "package >=1.19 installed");
+
         readonly GUIContent contentDebug =
             new GUIContent(
-                "7) Run your game in debug mode and validate the output using logcat or the Tuning Fork Monitor app");
+                "8) Run your game in debug mode and validate the output using logcat or the Tuning Fork Monitor app");
 
         readonly GUIContent contentVitals =
             new GUIContent(
-                "8) Confirm that you and other relevant game engineers have access to Android Vitals in the Google Play Console");
+                "9) Confirm that you and other relevant game engineers have access to Android Vitals in the Google Play Console");
 
 
         void RenderPluginStatus()
@@ -144,9 +153,16 @@ namespace Google.Android.PerformanceTuner.Editor
 
             // Step 7
             GUILayout.Space(5);
+#if !UNITY_2019_3_OR_NEWER || !APT_ADDRESSABLE_PACKAGE_PRESENT
+            EditorGUILayout.LabelField(contentAddressablesNotAvailable, Styles.richWordWrappedLabel);
+#else
+            EditorGUILayout.LabelField(contentAddressablesAvailable, Styles.richWordWrappedLabel);
+#endif
+            // Step 8
+            GUILayout.Space(5);
             EditorGUILayout.LabelField(contentDebug, Styles.richWordWrappedLabel);
 
-            // Step 8
+            // Step 9
             GUILayout.Space(5);
             EditorGUILayout.LabelField(contentVitals, Styles.richWordWrappedLabel);
 

@@ -154,7 +154,7 @@ namespace Google.Android.PerformanceTuner.Editor
         /// <summary>
         ///     Path to SetupConfig.asset file.
         /// </summary>
-        public static readonly string configPath = Path.Combine(
+        public static readonly string configPath = GetPathWithUnitySeparator(
             "Assets",
             "AndroidPerformanceTuner_gen",
             "Runtime",
@@ -174,5 +174,18 @@ namespace Google.Android.PerformanceTuner.Editor
         ///     Path to root folder with protoc binaries.
         /// </summary>
         public static readonly string protocPath = Path.Combine(pluginAbsolutePath, "Editor", "Protoc");
+
+        /// <summary>
+        ///     Scripting symbol to include scripts in the Utilities folder.
+        /// </summary>
+        public static readonly string utilitiesScriptingSymbol = "ANDROID_PERFORMANCE_TUNER_UTILITIES";
+
+        // Path.Combine produces a path with \ as separator on Windows but Unity always uses /.
+        // Use this function to produce paths that can be compared with string equality to Unity paths.
+        private static string GetPathWithUnitySeparator(params string[] paths)
+        {
+            string path = Path.Combine(paths);
+            return Path.DirectorySeparatorChar == '/' ? path : path.Replace(Path.DirectorySeparatorChar, '/');
+        }
     }
 }

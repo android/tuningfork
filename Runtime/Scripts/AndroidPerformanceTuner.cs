@@ -324,5 +324,24 @@ namespace Google.Android.PerformanceTuner
         {
             return m_Library.SetAggregationStrategyInterval(method, intervalMsOrCount);
         }
+
+#if APT_ADDRESSABLE_PACKAGE_PRESENT
+        /// <summary>
+        /// Converts the path of an addressable scene to its corresponding value in the proto
+        /// file to be used when setting annotations.
+        /// </summary>
+        public int ConvertAddressableScenePathToAPTSceneIndex(string scenePath)
+        {
+            if (addressablesScenes != null)
+            {
+                int sceneIndex;
+                return addressablesScenes.TryGetValue(
+                    AddressablesScenesEnumInfo.ConvertScenePathToProtoEnumEntry(scenePath, true), out sceneIndex)
+                    ? sceneIndex
+                    : -1;
+            }
+            return -1;
+        }
+#endif
     }
 }

@@ -109,14 +109,14 @@ namespace Google.Android.PerformanceTuner.Editor.Proto
         /// <summary>
         ///     Convert FileInfo into string formatted as it should appear in proto file.
         /// </summary>
-        public string ToProtoString()
+        public string ToProtoString(SetupConfig setupConfig)
         {
             string protoStr = String.Empty;
             if (m_Comment != string.Empty)
                 protoStr += string.Format("// {0}\n", m_Comment);
             protoStr += string.Format(k_DefaultOptions, m_CSharpNamespace);
             foreach (var info in m_Enums.Values)
-                protoStr += info.ToProtoString();
+                protoStr += info.ToProtoString(setupConfig);
             foreach (var message in m_Messages.Values)
                 protoStr += message.ToProtoString();
             return protoStr;

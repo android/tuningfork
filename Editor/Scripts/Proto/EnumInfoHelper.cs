@@ -82,9 +82,6 @@ namespace Google.Android.PerformanceTuner.Editor.Proto
             };
         }
 
-
-        static readonly Regex k_SceneFieldRegex = new Regex("[^a-zA-Z0-9_]");
-
         public static EnumInfo GetSceneEnum(EditorBuildSettingsScene[] scenes)
         {
             var info = new EnumInfo
@@ -92,18 +89,13 @@ namespace Google.Android.PerformanceTuner.Editor.Proto
                 name = Names.sceneEnumName,
                 values = new List<string>()
             };
-            // TODO (b/120588304): Make sure enum values are not duplicated.
+
             foreach (var scene in scenes)
             {
                 // Scene could be deleted, skip them
-                if (scene == null || string.IsNullOrEmpty(scene.path)) continue;
-                var sceneName = scene.path
-                    .Replace(Path.DirectorySeparatorChar, '_')
-                    .Replace(Path.AltDirectorySeparatorChar, '_')
-                    .Replace(Path.GetExtension(scene.path), "")
-                    .Replace(" ", "_")
-                    .ToUpper();
-                sceneName = k_SceneFieldRegex.Replace(sceneName, "");
+                if (scene == null || string.IsNullOrEmpty(scene.path) || !scene.enabled) continue;
+                var sceneName = AddressablesScenesEnumInfo.ConvertScenePathToProtoEnumEntry(scene.path, false);
+
                 info.values.Add(sceneName);
             }
 

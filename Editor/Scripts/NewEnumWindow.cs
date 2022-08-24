@@ -96,6 +96,9 @@ namespace Google.Android.PerformanceTuner.Editor
                     this.Close();
                 }
             }
+
+            GUILayout.Space(5);
+            EditorGUILayout.HelpBox("Please close this window before triggering a recompilation.", MessageType.Warning);
         }
 
         void MakeChecks()

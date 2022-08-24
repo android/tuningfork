@@ -25,6 +25,10 @@ using UnityEditor;
 using Google.Android.PerformanceTuner.Editor.Proto;
 using FileInfo = Google.Android.PerformanceTuner.Editor.Proto.FileInfo;
 
+#if APT_ADDRESSABLE_PACKAGE_PRESENT
+using UnityEditor.AddressableAssets.Settings;
+#endif
+
 namespace Google.Android.PerformanceTuner.Editor
 {
     /// <summary>
@@ -110,9 +114,13 @@ namespace Google.Android.PerformanceTuner.Editor
 
         static void Init()
         {
-            Debug.Log("Android Performance Tuner Initializer");
-
             setupConfig = FileUtil.LoadSetupConfig();
+
+            if (setupConfig.pluginVerboseLoggingEnabled)
+            {
+                Debug.Log("Android Performance Tuner Initializer");
+            }
+
             devDescriptor = CreateDescriptor();
 
             // When a new package is imported in Unity 2018, EditorBuildSettings.scenes are not updated yet when
@@ -155,6 +163,11 @@ namespace Google.Android.PerformanceTuner.Editor
             UpdateFidelityMessages();
             CheckForLoadingStateInAnnotation();
 
+            // Enables scripts in the Utilities folder which depend on the AndroidPerformanceTuner_gen folder having
+            // already been generated.
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, 
+                Paths.utilitiesScriptingSymbol);
+
             // TODO(kseniia): Check for possible inconsistencies in the data, set to false if any found
             // TODO(kseniia): or remove "valid" if all problems could be fixed in-place
             valid = true;
@@ -163,7 +176,10 @@ namespace Google.Android.PerformanceTuner.Editor
         [UnityEditor.Callbacks.DidReloadScripts]
         public static void RefreshAssetsCompleted()
         {
-            Debug.Log("Android Performance Tuner RefreshAssetsCompleted");
+            if (setupConfig && setupConfig.pluginVerboseLoggingEnabled)
+            {
+                Debug.Log("Android Performance Tuner RefreshAssetsCompleted");
+            }
         }
 
         static void CheckForLoadingStateInAnnotation()
@@ -214,7 +230,7 @@ namespace Google.Android.PerformanceTuner.Editor
                 }
 
                 Directory.CreateDirectory(Path.GetDirectoryName(Paths.devProtoPath));
-                File.WriteAllText(Paths.devProtoPath, protoFile.ToProtoString());
+                File.WriteAllText(Paths.devProtoPath, protoFile.ToProtoString(setupConfig));
                 if (!ProtocCompiler.GenerateProtoAndDesc() && onFail != null) onFail();
                 else
                 {

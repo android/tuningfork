@@ -85,5 +85,10 @@ namespace Google.Android.PerformanceTuner
         ///     tuningfork_settings.bin file. See tuningfork.proto for more information.
         /// </summary>
         public IntPtr api_key;
+
+        /// <summary>
+        ///      If false, sensitive information is removed from native logging.
+        /// </summary>
+        public bool verbose_logging_enabled;
     }
 }

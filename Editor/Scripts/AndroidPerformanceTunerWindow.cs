@@ -67,6 +67,7 @@ namespace Google.Android.PerformanceTuner.Editor
         AnnotationMessageEditor m_AnnotationMessageEditor;
         FidelityMessageEditor m_FidelityMessageEditor;
         InstrumentationSettingsEditor m_InstrumentationSettingsEditor;
+        AddressablesSettingsEditor m_AddressablesSettingsEditor;
 
         protected void OnEnable()
         {
@@ -90,9 +91,10 @@ namespace Google.Android.PerformanceTuner.Editor
                 Initializer.DevDescriptor.fidelityMessage, Initializer.EnumInfoHelper);
             m_InstrumentationSettingsEditor =
                 new InstrumentationSettingsEditor(Initializer.ProjectData, m_SetupConfig);
+            m_AddressablesSettingsEditor = new AddressablesSettingsEditor(m_SetupConfig);
         }
 
-        const int MenuSize = 6;
+        const int MenuSize = 7;
 
         readonly string[] m_ToolbarOptions = new string[MenuSize]
         {
@@ -101,7 +103,8 @@ namespace Google.Android.PerformanceTuner.Editor
             "Annotation parameters",
             "Fidelity parameters",
             "Quality levels",
-            "Instrumentation Settings"
+            "Instrumentation Settings",
+            "Addressables Settings"
         };
 
         readonly string[] m_Tooltips = new string[MenuSize]
@@ -111,10 +114,11 @@ namespace Google.Android.PerformanceTuner.Editor
             null,
             null,
             "To create custom quality levels, use custom fidelity parameters.",
+            null,
             null
         };
 
-        readonly bool[] m_ToolbarEnabled = new bool[MenuSize] {true, true, true, true, true, true};
+        readonly bool[] m_ToolbarEnabled = new bool[MenuSize] {true, true, true, true, true, true, true};
         int m_ToolbarSelected = 0;
 
         //TODO(b/120588304) Check if that color is ok.
@@ -167,6 +171,9 @@ namespace Google.Android.PerformanceTuner.Editor
                             break;
                         case 5:
                             m_InstrumentationSettingsEditor.OnGUI();
+                            break;
+                        case 6:
+                            m_AddressablesSettingsEditor.OnGUI();
                             break;
                     }
                 }

@@ -745,7 +745,7 @@ namespace Google.Android.PerformanceTuner
             }
             catch (Exception e)
             {
-                Debug.LogFormat("Cannot parse message, error {0}", e);
+                Debug.LogErrorFormat("Cannot parse message, error {0}", e);
                 return null;
             }
         }

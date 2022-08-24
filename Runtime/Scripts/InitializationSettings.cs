@@ -58,5 +58,10 @@ namespace Google.Android.PerformanceTuner
         ///     further requested metrics will not be added and data will be lost.
         /// </summary>
         public MetricLimits maxNumMetrics;
+
+        /// <summary>
+        ///      If false, sensitive information is removed from native logging.
+        /// </summary>
+        public bool verbose_logging_enabled;
     }
 }

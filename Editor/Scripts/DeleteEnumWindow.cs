@@ -112,6 +112,9 @@ namespace Google.Android.PerformanceTuner.Editor
             }
 
             EditorGUI.EndDisabledGroup();
+
+            GUILayout.Space(5);
+            EditorGUILayout.HelpBox("Please close this window before triggering a recompilation.", MessageType.Warning);
         }
 
         string CheckForDeleteErrors(string enumToDelete)

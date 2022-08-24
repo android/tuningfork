@@ -76,10 +76,7 @@ namespace Google.Android.PerformanceTuner.Editor
 
             var startInfo = new ProcessStartInfo() {FileName = binaryPath, Arguments = args};
 
-            var proc = new Process() {StartInfo = startInfo};
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardOutput = true;
-            proc.StartInfo.RedirectStandardError = true;
+            var proc = SetupProcess(startInfo);
             proc.Start();
 
             string output = proc.StandardOutput.ReadToEnd();
@@ -123,10 +120,7 @@ namespace Google.Android.PerformanceTuner.Editor
 
             var startInfo = new ProcessStartInfo() {FileName = binaryPath, Arguments = args};
 
-            var proc = new Process() {StartInfo = startInfo};
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardOutput = true;
-            proc.StartInfo.RedirectStandardError = true;
+            var proc = SetupProcess(startInfo);
             proc.Start();
 
             string output = proc.StandardOutput.ReadToEnd();
@@ -156,10 +150,7 @@ namespace Google.Android.PerformanceTuner.Editor
                 FileName = binaryPath,
                 Arguments = "--version"
             };
-            var proc = new Process() {StartInfo = info};
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardError = true;
-            proc.StartInfo.RedirectStandardOutput = true;
+            var proc = SetupProcess(info);
             proc.Start();
 
             string output = proc.StandardOutput.ReadToEnd();
@@ -173,6 +164,16 @@ namespace Google.Android.PerformanceTuner.Editor
             }
 
             return output.Trim();
+        }
+
+        private static Process SetupProcess(ProcessStartInfo info)
+        {
+            var proc = new Process() {StartInfo = info};
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.RedirectStandardError = true;
+            proc.StartInfo.RedirectStandardOutput = true;
+            proc.StartInfo.CreateNoWindow = true;
+            return proc;
         }
     }
 }

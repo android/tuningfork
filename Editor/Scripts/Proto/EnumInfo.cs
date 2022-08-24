@@ -20,6 +20,7 @@
 
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Google.Android.PerformanceTuner.Editor.Proto
 {
@@ -37,13 +38,19 @@ namespace Google.Android.PerformanceTuner.Editor.Proto
         /// <summary>
         ///     Convert EnumInfo into a string formatted as it should appear in .proto file.
         /// </summary>
-        public string ToProtoString()
+        public string ToProtoString(SetupConfig setupConfig)
         {
             AddInvalidValue();
             var str = "\nenum " + name + " {\n";
             for (var i = 0; i < values.Count; ++i)
                 str += string.Format("    {0}_{1} = {2};\n", name.ToUpper(), values[i].ToUpper(), i);
 
+#if APT_ADDRESSABLE_PACKAGE_PRESENT
+            if(setupConfig != null && name.ToUpper().Equals("SCENE") && setupConfig.AreAddressablesScenesPresent()){
+                for (var i = 0; i < setupConfig.AddressablesScenes.Count; ++i)
+                    str += string.Format("    {0}_{1} = {2};\n", name.ToUpper(), setupConfig.AddressablesScenes[i].protoEnumSceneName, setupConfig.AddressablesScenes[i].value);
+            }
+#endif
             str += "}\n";
             return str;
         }

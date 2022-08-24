@@ -59,7 +59,6 @@ namespace Google.Android.PerformanceTuner
         [MonoPInvokeCallback(typeof(DeallocCallback))]
         static void DeallocCallbackImpl(ref CProtobufSerialization parameters)
         {
-            Debug.LogFormat("DeallocCallbackImpl.size: {0}", parameters.size);
             if (parameters.bytes != IntPtr.Zero)
             {
                 Marshal.FreeHGlobal(parameters.bytes);

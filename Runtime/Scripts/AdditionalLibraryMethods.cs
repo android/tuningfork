@@ -77,7 +77,8 @@ namespace Google.Android.PerformanceTuner
                 endpoint_uri_override = IntPtr.Zero,
                 swappy_version = 0, // It will be set by native library.
                 max_num_metrics = settings.maxNumMetrics,
-                api_key = IntPtr.Zero
+                api_key = IntPtr.Zero,
+                verbose_logging_enabled = settings.verbose_logging_enabled
             };
 
             if (settings.trainingFidelityParams != null)
