@@ -163,11 +163,6 @@ namespace Google.Android.PerformanceTuner.Editor
             UpdateFidelityMessages();
             CheckForLoadingStateInAnnotation();
 
-            // Enables scripts in the Utilities folder which depend on the AndroidPerformanceTuner_gen folder having
-            // already been generated.
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, 
-                Paths.utilitiesScriptingSymbol);
-
             // TODO(kseniia): Check for possible inconsistencies in the data, set to false if any found
             // TODO(kseniia): or remove "valid" if all problems could be fixed in-place
             valid = true;

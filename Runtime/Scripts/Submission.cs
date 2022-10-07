@@ -25,8 +25,19 @@ namespace Google.Android.PerformanceTuner
     /// </summary>
     public enum Submission
     {
+        /// <summary>
+        /// Undefined submission method. Should not be set to this.
+        /// </summary>
         Undefined = 0,
+
+        /// <summary>
+        /// Submission based on elapsed time.
+        /// </summary>
         TimeBased = 1,
+
+        /// <summary>
+        /// Submission based on the elapsed number of ticks.
+        /// </summary>
         TickBased = 2,
     }
 }

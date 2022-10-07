@@ -25,10 +25,25 @@ namespace Google.Android.PerformanceTuner
     /// </summary>
     public enum LifecycleState
     {
+        /// <summary>
+        /// Uninitialized.
+        /// </summary>
         Uninitialized = 0,
+        /// <summary>
+        /// OnCreate.
+        /// </summary>
         OnCreate = 1,
+        /// <summary>
+        /// OnStart.
+        /// </summary>
         OnStart = 2,
+        /// <summary>
+        /// OnStop.
+        /// </summary>
         OnStop = 3,
+        /// <summary>
+        /// OnDestroy.
+        /// </summary>
         OnDestroy = 4,
     }
 }

@@ -18,9 +18,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-// Enabled in Initializer after having generated the classes this script depends on.
-// Delete this symbol from Unity if the APT Plugin is removed from the project.
-#if ANDROID_PERFORMANCE_TUNER_UTILITIES
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -198,4 +195,3 @@ namespace Google.Android.PerformanceTuner.Editor
         }
     }
 }
-#endif
