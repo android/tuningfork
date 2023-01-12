@@ -114,15 +114,13 @@ namespace Google.Android.PerformanceTuner
         /// <param name="sceneBuildIndex">The scene's build index to set.</param>
         public static void SetScene(IMessage message, int sceneBuildIndex)
         {
-            // 0-index values in all enums are invalid.
-            // Scene with index 0 has enum with index 1.
-            // Increase sceneBuildIndex by one to match index in Scene enum.
-            sceneBuildIndex++;
             var sceneEnumType = message.GetType().GetProperty(k_SceneObjectField).PropertyType;
 
-            // To prevent incorrect enum value.
-            var enumSize = Enum.GetValues(sceneEnumType).Length;
-            sceneBuildIndex = Mathf.Clamp(sceneBuildIndex, 0, enumSize - 1);
+            if (!Enum.IsDefined(sceneEnumType, sceneBuildIndex))
+            {
+                // To prevent incorrect enum value.
+                sceneBuildIndex = 0;
+            }
 
             message.GetType().InvokeMember(
                 k_SceneObjectField,

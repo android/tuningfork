@@ -252,8 +252,12 @@ namespace Google.Android.PerformanceTuner
         {
             var annotation = new TAnnotation();
             int sceneIndex = -1;
-            if(to.buildIndex >= 0){
-                sceneIndex = to.buildIndex;
+            if (to.buildIndex >= 0)
+            {
+                // 0-index values in all enums are invalid.
+                // Scene with index 0 has enum with index 1.
+                // Increase buildIndex by one to match index in Scene enum.
+                sceneIndex = to.buildIndex + 1;
             }
 #if APT_ADDRESSABLE_PACKAGE_PRESENT
             else
