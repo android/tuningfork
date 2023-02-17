@@ -1,0 +1,10 @@
+# Ignore reason: These binaries are officially published tools that are provided for developer convenience.
+ignorePaths:
+- Editor/Protoc/linux64/protoc
+- Editor/Protoc/mac/protoc
+- Editor/Protoc/win32/protoc.exe
+- Runtime/Plugins/Android/Google.Protobuf.dll
+- Runtime/Plugins/Android/arm64-v8a/libunitytuningfork.so
+- Runtime/Plugins/Android/armeabi-v7a/libunitytuningfork.so
+- Runtime/Plugins/Android/x86-64/libunitytuningfork.so
+- Runtime/Plugins/Android/x86/libunitytuningfork.so
