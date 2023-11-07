@@ -19,6 +19,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using Google.Protobuf;
 using UnityEngine;
 
@@ -343,5 +344,20 @@ namespace Google.Android.PerformanceTuner
             return -1;
         }
 #endif
+        /// <summary>
+        ///   Get Predicted frame times for the device per fidelity. The call blocks until a response or
+        ///   the timeout is hit.
+        ///
+        ///   The return value contains an error code & a list of objects of the type QualityLevelPredictions.
+        ///   The list can be empty even in case of no errors. The fidelity parameter can be empty if the
+        ///   parsing of the protobuf has gone wrong.
+        ///
+        /// </summary>
+        /// <param name="timeoutMs">Timeout in milliseconds</param>
+        /// <returns>The fidelity parameters, if successfully loaded.</returns>
+        public Result<List<QualityLevelPredictions<TFidelity>>> GetQualityLevelPredictions(UInt32 timeoutMs)
+        {
+            return m_AdditionalLibraryMethods.GetQualityLevelPredictions(timeoutMs);
+        }
     }
 }

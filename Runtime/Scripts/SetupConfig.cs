@@ -68,7 +68,17 @@ namespace Google.Android.PerformanceTuner
         /// </summary>
         public bool pluginVerboseLoggingEnabled;
 
+        /// <summary>
+        ///      If true, disables additional native telemetry collection
+        /// </summary>
+        public bool disableAsyncTelemetry;
+
         public TunerMode mode = TunerMode.Insights;
+
+        /// <summary>
+        ///      Enable default usage of predictability API
+        /// </summary>
+        public bool defaultPredictionEnabled = false;
 
 #if APT_ADDRESSABLE_PACKAGE_PRESENT
         [SerializeField] private string addressablesSettingsObjectPath = "";
@@ -215,6 +225,11 @@ namespace Google.Android.PerformanceTuner
                     break;
                 default: throw new System.ArgumentException("Unknown message type");
             }
+        }
+
+        public void SetDefaultPredictions(bool enabled)
+        {
+            defaultPredictionEnabled = enabled;
         }
     }
 }

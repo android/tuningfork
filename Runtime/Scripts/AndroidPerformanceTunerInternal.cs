@@ -45,6 +45,7 @@ namespace Google.Android.PerformanceTuner
         string m_endPoint = null;
         MetricLimits m_MetricLimits;
         const string k_LocalEndPoint = "http://localhost:9000";
+        const int k_PredictionTimeoutMs = 10000;
         Dictionary<string, int> addressablesScenes;
 
         // For callbacks only.
@@ -103,6 +104,7 @@ namespace Google.Android.PerformanceTuner
             settings.maxNumMetrics = m_MetricLimits;
 
             settings.verbose_logging_enabled = m_SetupConfig.verboseLoggingEnabled;
+            settings.disable_async_telemetry = m_SetupConfig.disableAsyncTelemetry;
 
             var errorCode = m_AdditionalLibraryMethods.InitWithSettings(settings);
 
@@ -110,6 +112,12 @@ namespace Google.Android.PerformanceTuner
             {
                 m_AdditionalLibraryMethods.FreePointers();
                 return errorCode;
+            }
+
+            if (m_SetupConfig.defaultPredictionEnabled)
+            {
+                Debug.Log("Enabling prediction API(alpha) with default fidelity parameters for frame-rate: " + Application.targetFrameRate);
+                SetDefaultPrediction(m_SetupConfig);
             }
 
             m_OnStop += () => m_AdditionalLibraryMethods.FreePointers();
@@ -168,6 +176,51 @@ namespace Google.Android.PerformanceTuner
             }
 
             return ErrorCode.Ok;
+        }
+
+        void SetDefaultPrediction(SetupConfig config)
+        {
+            if (config.useAdvancedFidelityParameters) return;
+
+            if (Application.targetFrameRate <= 0)
+            {
+                Debug.LogWarningFormat("Android Performance Tuner: Target framerate is invalid for prediction");
+                return;
+            }
+            var outList = GetQualityLevelPredictions(k_PredictionTimeoutMs);
+            if (outList.errorCode != ErrorCode.Ok)
+            {
+                Debug.LogWarningFormat("Android Performance Tuner: Error getting the quality level predictions, status {0}", outList.errorCode);
+                // Silently return on error as lack of predictions is not detrimental to tuningfork.
+                return;
+            }
+
+            // Logic for picking the QL
+            int qualityLevel = -1;
+            // An initially large value (100ms)
+            float frameRateDelta = 100_000;
+
+            float requiredFrameTime = 1000_000 / Application.targetFrameRate;
+            for (int i = 0; i < outList.value.Count; i++)
+            {
+                var localDelta = requiredFrameTime - outList.value[i].predictedTimeUs;
+
+                //Find a QL that is performing the closest and still able to meet the threshold
+                if (localDelta < frameRateDelta)
+                {
+                    frameRateDelta = localDelta;
+                    qualityLevel = MessageUtil.GetQualityLevel(outList.value[i].fidelity);
+                }
+            }
+            if (qualityLevel != -1)
+            {
+                Debug.LogFormat("Android Performance Tuner: Setting quality level {0} based on the predictions", qualityLevel);
+                QualitySettings.SetQualityLevel(qualityLevel);
+            }
+            else
+            {
+                Debug.LogFormat("Android Performance Tuner: No quality level found matching the performance requirement for this device");
+            }
         }
 
         void EnableDefaultAnnotationsMode()
@@ -282,6 +335,12 @@ namespace Google.Android.PerformanceTuner
         IEnumerator QualitySettingsCheck()
         {
             int currentLevel = QualitySettings.GetQualityLevel();
+            TFidelity defaultMessage = new TFidelity();
+            MessageUtil.SetQualityLevel(defaultMessage, QualitySettings.GetQualityLevel());
+            var defaultErrorCode = m_AdditionalLibraryMethods.SetFidelityParameters(defaultMessage);
+            if (defaultErrorCode != ErrorCode.Ok)
+                Debug.LogErrorFormat("SetFidelityParameters({0}) result is {1}", defaultMessage, defaultErrorCode);
+
             while (true)
             {
                 yield return new WaitForEndOfFrame();

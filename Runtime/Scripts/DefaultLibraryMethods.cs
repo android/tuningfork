@@ -138,6 +138,16 @@ namespace Google.Android.PerformanceTuner
         {
             return ErrorCode.PlatformNotSupported;
         }
+
+        public ErrorCode GetQualityLevelPredictions(ref QualityLevelPredictionsCStruct predStruct, UInt32 timeoutMS)
+        {
+            return ErrorCode.PlatformNotSupported;
+        }
+
+        public void FreeQualityLevelPredictions(ref QualityLevelPredictionsCStruct predStruct)
+        {
+            // Nothing to do here
+        }
     }
 }
 #endif

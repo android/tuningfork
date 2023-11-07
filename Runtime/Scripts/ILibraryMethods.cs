@@ -87,5 +87,9 @@ namespace Google.Android.PerformanceTuner
         ErrorCode StopLoadingGroup(ulong handle);
 
         ErrorCode SetAggregationStrategyInterval(Submission method, UInt32 intervalMsOrCount);
+
+        ErrorCode GetQualityLevelPredictions(ref QualityLevelPredictionsCStruct predStruct, UInt32 timeoutMS);
+
+        void FreeQualityLevelPredictions(ref QualityLevelPredictionsCStruct predStruct);
     }
 }

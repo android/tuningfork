@@ -205,6 +205,35 @@ namespace Google.Android.PerformanceTuner
         /// </summary>
         MeteredConnectionDisallowed = 35,
 
+        /// <summary>
+        ///     The loading state was not set as part of LoadingTimeMetadata when calling a loading function.
+        /// </summary>
+        InvalidLoadingState = 36,
+
+        /// <summary>
+        ///     There was no active loading group when stopping loading group
+        /// </summary>
+        NoActiveLoadingGroup = 37,
+
+        /// <summary>
+        ///     Cannot pause frame time logging because it is already paused.
+        /// </summary>
+        FrameLoggingAlreadyPaused = 38,
+
+        /// <summary>
+        ///     Cannot resume frame time logging because it is already running.
+        /// </summary>
+        LoggingAlreadyRunning = 39,
+
+        /// <summary>
+        ///     An error occured parsing the response to predictQualityLevels.
+        /// </summary>
+        PredictQualityLevelsParseError = 40,
+
+        /// <summary>
+        ///     The response from predictQualityLevels was not a success code.
+        /// </summary>
+        PredictQualityLevelsResponseError = 41,
 
         // Unity only codes have reserved range 100-150
 
@@ -222,5 +251,11 @@ namespace Google.Android.PerformanceTuner
         ///     Using incorrect API for default/custom modes.
         /// </summary>
         InvalidMode = 102,
+
+        /// <summary>
+        ///     Invalid data from predictQualityLevels native call.
+        /// </summary>
+        InvalidPredictQLData = 103,
+
     }
 }

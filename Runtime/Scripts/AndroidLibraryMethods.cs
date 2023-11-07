@@ -225,6 +225,22 @@ namespace Google.Android.PerformanceTuner
         {
             return (ErrorCode) TuningFork_setAggregationStrategyInterval(method, intervalMsOrCount);
         }
+
+        [DllImport(PerformanceTuner)]
+        static extern int TuningFork_predictQualityLevels(ref QualityLevelPredictionsCStruct predStruct, UInt32 timeoutMS);
+
+        public ErrorCode GetQualityLevelPredictions(ref QualityLevelPredictionsCStruct predStruct, UInt32 timeoutMS)
+        {
+            return (ErrorCode) TuningFork_predictQualityLevels(ref predStruct, timeoutMS);
+        }
+
+        [DllImport(PerformanceTuner)]
+        static extern void TuningFork_QualityLevelPredictions_free(ref QualityLevelPredictionsCStruct predStruct);
+
+        public void FreeQualityLevelPredictions(ref QualityLevelPredictionsCStruct predStruct)
+        {
+            TuningFork_QualityLevelPredictions_free(ref predStruct);
+        }
     }
 }
 #endif

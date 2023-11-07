@@ -58,6 +58,8 @@ namespace Google.Android.PerformanceTuner.Editor
                     m_SetupConfig.verboseLoggingEnabled);
                 m_SetupConfig.pluginVerboseLoggingEnabled = EditorGUILayout.Toggle("Plugin verbose logging enabled",
                     m_SetupConfig.pluginVerboseLoggingEnabled);
+                m_SetupConfig.disableAsyncTelemetry = EditorGUILayout.Toggle("Disable async telemetry",
+                    m_SetupConfig.disableAsyncTelemetry);
 
                 if (group.changed) EditorUtility.SetDirty(m_SetupConfig);
             }

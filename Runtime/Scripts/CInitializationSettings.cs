@@ -89,6 +89,11 @@ namespace Google.Android.PerformanceTuner
         /// <summary>
         ///      If false, sensitive information is removed from native logging.
         /// </summary>
-        public bool verbose_logging_enabled;
+        public byte verbose_logging_enabled;
+        
+        /// <summary>
+        ///      If true, disables additional native telemetry collection
+        /// </summary>
+        public byte disable_async_telemetry;
     }
 }

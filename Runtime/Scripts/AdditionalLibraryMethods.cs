@@ -22,6 +22,7 @@ using System;
 using Google.Protobuf;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using UnityEngine;
 
 namespace Google.Android.PerformanceTuner
 {
@@ -78,7 +79,8 @@ namespace Google.Android.PerformanceTuner
                 swappy_version = 0, // It will be set by native library.
                 max_num_metrics = settings.maxNumMetrics,
                 api_key = IntPtr.Zero,
-                verbose_logging_enabled = settings.verbose_logging_enabled
+                verbose_logging_enabled = Convert.ToByte(settings.verbose_logging_enabled),
+                disable_async_telemetry = Convert.ToByte(settings.disable_async_telemetry)
             };
 
             if (settings.trainingFidelityParams != null)
@@ -211,6 +213,57 @@ namespace Google.Android.PerformanceTuner
             }
 
             return new Result<ulong>(errorCode, handle);
+        }
+        public Result<List<QualityLevelPredictions<TFidelity>>> GetQualityLevelPredictions(UInt32 timeoutMs)
+        {
+
+            // Get the native predictions
+            var predStruct = new QualityLevelPredictionsCStruct();
+            var errorCode = m_LibraryMethods.GetQualityLevelPredictions(ref predStruct, timeoutMs);
+            var outPredictions = new List<QualityLevelPredictions<TFidelity>>();
+
+            if (errorCode != ErrorCode.Ok)
+            {
+                // Even on error, return a valid empty list instead of null.
+                return new Result<List<QualityLevelPredictions<TFidelity>>>(errorCode, outPredictions);
+            }
+
+            int numLevels = (int)predStruct.size;
+
+            IntPtr localFpPtr = predStruct.fidelityParams;
+            IntPtr localTimePtr = predStruct.predictedTimeUs;
+
+            if (localFpPtr == IntPtr.Zero || localTimePtr == IntPtr.Zero)
+            {
+                errorCode = ErrorCode.InvalidPredictQLData;
+            }
+            else
+            {
+                for (int i = 0; i < numLevels; i++)
+                {
+                    var predLevelData = new QualityLevelPredictions<TFidelity>();
+
+                    // Get fidelity Parameters
+                    var newPs = (CProtobufSerialization)Marshal.PtrToStructure(localFpPtr, typeof(CProtobufSerialization));
+                    predLevelData.fidelity = null;
+                    predLevelData.fidelity = newPs.ParseMessage<TFidelity>();
+                    if (predLevelData.fidelity == null)
+                    {
+                        Debug.LogError("Invalid Fidelity parameters detected;");
+                    }
+
+                    localFpPtr = (IntPtr)(localFpPtr + Marshal.SizeOf(newPs));
+
+                    // Get frame prediction time
+                    predLevelData.predictedTimeUs = (int)Marshal.ReadInt32(localTimePtr, i * sizeof(Int32));
+
+                    outPredictions.Add(predLevelData);
+                }
+            }
+
+            m_LibraryMethods.FreeQualityLevelPredictions(ref predStruct);
+
+            return new Result<List<QualityLevelPredictions<TFidelity>>>(errorCode, outPredictions);
         }
     }
 }
